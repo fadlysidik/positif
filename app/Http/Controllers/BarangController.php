@@ -22,40 +22,40 @@ class BarangController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'produk_id' => 'required|exists:produk,id',
-        'nama_barang' => 'required|max:100',
-        'satuan' => 'required|max:10',
-        'harga_jual' => 'required|numeric',
-        'stok' => 'required|integer',
-        'gambar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'expired' => 'required|date',
-    ]);
+    {
+        $request->validate([
+            'produk_id' => 'required|exists:produk,id',
+            'nama_barang' => 'required|max:100',
+            'satuan' => 'required|max:10',
+            'harga_jual' => 'required|numeric',
+            'stok' => 'required|integer',
+            'gambar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'expired' => 'required|date',
+        ]);
 
-    // Generate kode barang unik
-    $date = date('Ymd');
-    $lastBarang = Barang::whereDate('created_at', now()->toDateString())->latest()->first();
-    $number = $lastBarang ? intval(substr($lastBarang->kode_barang, -4)) + 1 : 1;
-    $kodeBarang = 'BRG-' . $date . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+        // Generate kode barang unik
+        $date = date('Ymd');
+        $lastBarang = Barang::whereDate('created_at', now()->toDateString())->latest()->first();
+        $number = $lastBarang ? intval(substr($lastBarang->kode_barang, -4)) + 1 : 1;
+        $kodeBarang = 'BRG-' . $date . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
 
-    // Simpan gambar
-    $gambarPath = $request->file('gambar')->store('barang_images', 'public');
+        // Simpan gambar
+        $gambarPath = $request->file('gambar')->store('barang_images', 'public');
 
-    Barang::create([
-        'kode_barang' => $kodeBarang,
-        'produk_id' => $request->produk_id,
-        'nama_barang' => $request->nama_barang,
-        'satuan' => $request->satuan,
-        'harga_jual' => $request->harga_jual,
-        'stok' => $request->stok,
-        'gambar' => $gambarPath,
-        'expired' => $request->expired,
-        'user_id' => auth()->id(),
-    ]);
+        Barang::create([
+            'kode_barang' => $kodeBarang,
+            'produk_id' => $request->produk_id,
+            'nama_barang' => $request->nama_barang,
+            'satuan' => $request->satuan,
+            'harga_jual' => $request->harga_jual,
+            'stok' => $request->stok,
+            'gambar' => $gambarPath,
+            'expired' => $request->expired,
+            'user_id' => auth()->id(),
+        ]);
 
-    return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan.');
-}
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan.');
+    }
 
 
     public function edit($id)

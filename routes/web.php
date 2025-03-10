@@ -31,7 +31,7 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth')->group(function () {
-    
+
     // Dashboard berdasarkan role
     Route::middleware('role:admin')->get('/dashboard.admin', [DashboardController::class, 'index'])->name('dashboard.admin');
     Route::middleware('role:kasir')->get('/dashboard.kasir', [DashboardController::class, 'kasirDashboard'])->name('dashboard.kasir');
@@ -59,19 +59,20 @@ Route::middleware('auth')->group(function () {
 
     //penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
-    Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
-    Route::get('/penjualan/{id}/edit', [PenjualanController::class, 'edit'])->name('penjualan.edit');
-    Route::put('/penjualan/{id}', [PenjualanController::class, 'update'])->name('penjualan.update');
-    Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy');
-    
+    Route::get('/penjualan/create', [PenjualanController::class, 'create'])->name('penjualan.create');
+    Route::post('/penjualan/store', [PenjualanController::class, 'store'])->name('penjualan.store');
+    Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
+    Route::get('/penjualan/{id}/pembayaran', [PenjualanController::class, 'pembayaran'])->name('penjualan.pembayaran');
+    Route::post('/penjualan/{id}/proses-pembayaran', [PenjualanController::class, 'prosesPembayaran'])->name('penjualan proses_pembayaran');
+    Route::get('/penjualan/{id}/struk', [PenjualanController::class, 'struk'])->name('penjualan.struk');
+
     //pelanggan
     Route::resource('pelanggan', PelangganController::class);
 
-     //settings
-     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
+    //settings
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
 
-     // Logout route
-     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Logout route
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-    

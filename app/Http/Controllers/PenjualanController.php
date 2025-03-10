@@ -2,61 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Penjualan;
+use App\Models\DetailPenjualan;
+use App\Models\Barang;
 use App\Models\Pelanggan;
-use App\Models\User;
+use Illuminate\Http\Request;
 
 class PenjualanController extends Controller
 {
     public function index()
     {
-        $penjualan = Penjualan::with(['pelanggan', 'user'])->get();
-        $pelanggan = Pelanggan::all();
-        $users = User::all();
-        return view('penjualan.index', compact('penjualan', 'pelanggan', 'users'));
+        $penjualan = Penjualan::with('pelanggan')->paginate(10);
+        return view('penjualan.index', compact('penjualan'));
+    }
+
+
+    public function create()
+    {
+        $pelanggan = Pelanggan::all();  // Ambil semua pelanggan
+        $barang = Barang::all();        // Ambil semua barang
+        return view('penjualan.create', compact('pelanggan', 'barang'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'no_faktur' => 'required|unique:penjualan,no_faktur|max:50',
-            'tgl_faktur' => 'required|date',
-            'total_bayar' => 'required|numeric',
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'user_id' => 'required|exists:users,id',
+            'pelanggan_id' => 'required',
+            'barang_id' => 'required|array',
+            'jumlah' => 'required|array',
+            'harga_jual' => 'required|array',
         ]);
 
-        Penjualan::create($request->all());
+        // Generate nomor faktur otomatis
+        $latestPenjualan = Penjualan::latest()->first();
+        $number = $latestPenjualan ? ((int) substr($latestPenjualan->no_faktur, 3)) + 1 : 1;
+        $noFaktur = 'FKT-' . str_pad($number, 4, '0', STR_PAD_LEFT);
 
-        return redirect()->back()->with('success', 'Penjualan berhasil ditambahkan');
+        // Simpan data penjualan
+        $penjualan = Penjualan::create([
+            'no_faktur' => $noFaktur,
+            'tgl_faktur' => now(),
+            'total_bayar' => 0, // Akan dihitung setelah detail dimasukkan
+            'pelanggan_id' => $request->pelanggan_id,
+            'user_id' => auth()->id(),
+        ]);
+
+        // Simpan detail penjualan
+        $totalBayar = 0;
+        foreach ($request->barang_id as $index => $barangId) {
+            $barang = Barang::find($barangId);
+            $subTotal = $request->harga_jual[$index] * $request->jumlah[$index];
+            $totalBayar += $subTotal;
+
+            DetailPenjualan::create([
+                'penjualan_id' => $penjualan->id,
+                'barang_id' => $barangId,
+                'harga_jual' => $request->harga_jual[$index],
+                'jumlah' => $request->jumlah[$index],
+                'sub_total' => $subTotal,
+            ]);
+        }
+
+        // Update total bayar pada tabel penjualan
+        $penjualan->update([
+            'total_bayar' => $totalBayar
+        ]);
+
+        return response()->json(['message' => 'Transaksi berhasil disimpan!'], 200);
     }
 
-    public function edit($id)
+
+    public function show($id)
     {
-        $penjualan = Penjualan::findOrFail($id);
-        return response()->json($penjualan);
+        // Ambil penjualan berdasarkan ID dan sertakan relasi detail penjualan dan barang
+        $penjualan = Penjualan::with(['detailPenjualan', 'detailPenjualan.barang'])->findOrFail($id);
+
+        return view('penjualan.show', compact('penjualan'));
     }
 
-    public function update(Request $request, $id)
+    public function pembayaran($id)
+    {
+        $penjualan = Penjualan::with('detailPenjualan.barang')->findOrFail($id);
+        return view('penjualan.pembayaran', compact('penjualan'));
+    }
+
+    public function prosesPembayaran(Request $request, $id)
     {
         $request->validate([
-            'no_faktur' => 'required|max:50|unique:penjualan,no_faktur,' . $id,
-            'tgl_faktur' => 'required|date',
-            'total_bayar' => 'required|numeric',
-            'pelanggan_id' => 'required|exists:pelanggan,id',
-            'user_id' => 'required|exists:users,id',
+            'bayar' => 'required|numeric|min:' . Penjualan::findOrFail($id)->total_bayar
         ]);
 
         $penjualan = Penjualan::findOrFail($id);
-        $penjualan->update($request->all());
+        $penjualan->update(['status' => 'Lunas']);
 
-        return redirect()->back()->with('success', 'Penjualan berhasil diperbarui');
+        return redirect()->route('penjualan.struk', $id)->with('success', 'Pembayaran berhasil!');
     }
 
-    public function destroy($id)
+    public function struk($id)
     {
-        Penjualan::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Penjualan berhasil dihapus');
+        $penjualan = Penjualan::with('detailPenjualan.barang')->findOrFail($id);
+        return view('penjualan.struk', compact('penjualan'));
     }
 }
