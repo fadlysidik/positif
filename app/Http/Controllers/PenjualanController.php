@@ -27,7 +27,7 @@ class PenjualanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pelanggan_id' => 'required',
+            'pelanggan_id' => 'nullable',
             'barang_id' => 'required|array',
             'jumlah' => 'required|array',
             'harga_jual' => 'required|array',
@@ -43,7 +43,7 @@ class PenjualanController extends Controller
             'no_faktur' => $noFaktur,
             'tgl_faktur' => now(),
             'total_bayar' => 0, // Akan dihitung setelah detail dimasukkan
-            'pelanggan_id' => $request->pelanggan_id,
+            'pelanggan_id' => $request->pelanggan_id ?? null,
             'user_id' => auth()->id(),
         ]);
 

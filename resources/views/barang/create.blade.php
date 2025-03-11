@@ -44,9 +44,17 @@
 
         <div class="mb-3">
             <label for="satuan" class="form-label">Satuan</label>
-            <input type="text" class="form-control" id="satuan" name="satuan" 
-                   value="{{ old('satuan', $barang->satuan ?? '') }}" required>
+            <select class="form-control" id="satuan" name="satuan" required>
+                <option value="">Pilih Satuan</option>
+                <option value="pcs" {{ old('satuan', $barang->satuan ?? '') == 'pcs' ? 'selected' : '' }}>Pcs</option>
+                <option value="lusin" {{ old('satuan', $barang->satuan ?? '') == 'lusin' ? 'selected' : '' }}>Lusin</option>
+                <option value="kodi" {{ old('satuan', $barang->satuan ?? '') == 'kodi' ? 'selected' : '' }}>Kodi</option>
+                <option value="kg" {{ old('satuan', $barang->satuan ?? '') == 'kg' ? 'selected' : '' }}>Kilogram</option>
+                <option value="gram" {{ old('satuan', $barang->satuan ?? '') == 'gram' ? 'selected' : '' }}>Gram</option>
+                <option value="gram" {{ old('satuan', $barang->satuan ?? '') == 'gram' ? 'selected' : '' }}>Pasang</option>
+            </select>
         </div>
+        
 
         <div class="mb-3">
             <label for="harga_jual" class="form-label">Harga Jual</label>
@@ -63,7 +71,7 @@
         <div class="mb-3">
             <label for="expired" class="form-label">Tanggal Expired</label>
             <input type="datetime-local" class="form-control" id="expired" name="expired" 
-                   value="{{ old('expired', isset($barang->expired) ? date('Y-m-d\TH:i', strtotime($barang->expired)) : '') }}" required>
+                   value="{{ old('expired', isset($barang->expired) ? date('Y-m-d\TH:i', strtotime($barang->expired)) : '') }}">
         </div>
 
         <div class="mb-3">

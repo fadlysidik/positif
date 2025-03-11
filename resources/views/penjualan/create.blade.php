@@ -33,16 +33,41 @@
                         <tr>
                             <th>Item</th>
                             <th>Qty</th>
+                            <th>Harga</th>
                             <th>Subtotal</th>
                         </tr>
                     </thead>
                     <tbody id="keranjang-body">
                         <tr>
-                            <td colspan="3" class="text-center text-muted">Keranjang kosong</td>
+                            <td colspan="4" class="text-center text-muted">Keranjang kosong</td>
                         </tr>
                     </tbody>
                 </table>
                 <h5>Total: Rp <span id="total">0</span></h5>
+
+                <hr>
+
+                <!-- Form Input Pembayaran -->
+                <select class="form-control" id="pelanggan_id">
+                    <option value="">Tanpa Pelanggan</option>
+                    @foreach($pelanggan as $p)
+                        <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                    @endforeach
+                </select>
+
+                <div class="mb-2">
+                    <label class="form-label">Kasir</label>
+                    <input type="text" class="form-control" value="{{ auth()->user()->name }}" readonly>
+                </div>
+
+                <div class="mb-2">
+                    <label for="jumlah_tunai" class="form-label">Jumlah Tunai</label>
+                    <input type="number" class="form-control" id="jumlah_tunai" oninput="hitungKembalian()">
+                </div>
+
+                <h5>Kembalian: Rp <span id="kembalian">0</span></h5>
+
+                <button class="btn btn-danger btn-block" onclick="clearKeranjang()">Clear</button>
                 <button class="btn btn-primary btn-block" onclick="prosesPembayaran()">Bayar</button>
             </div>
         </div>
@@ -55,123 +80,129 @@
         height: 120px;
         object-fit: cover;
     }
-
-    /* Pastikan semua kartu memiliki tinggi yang sama */
-    .card {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    /* Pastikan tombol "Tambah" sejajar di semua kartu */
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
 </style>
 
 <script>
     let keranjang = [];
 
-    function tambahKeKeranjang(id, nama, harga) {
-        let index = keranjang.findIndex(item => item.id === id);
-        if (index !== -1) {
-            keranjang[index].qty++;
-            keranjang[index].subtotal = keranjang[index].qty * harga;
-        } else {
-            keranjang.push({
-                id,
-                nama,
-                harga,
-                qty: 1,
-                subtotal: harga
-            });
+function tambahKeKeranjang(id, nama, harga) {
+    let index = keranjang.findIndex(item => item.id === id);
+    if (index !== -1) {
+        keranjang[index].qty++;
+        keranjang[index].subtotal = keranjang[index].qty * harga;
+    } else {
+        keranjang.push({ id, nama, harga, qty: 1, subtotal: harga });
+    }
+    renderKeranjang();
+}
+
+function kurangiDariKeranjang(id) {
+    let index = keranjang.findIndex(item => item.id === id);
+    if (index !== -1) {
+        keranjang[index].qty--;
+        keranjang[index].subtotal = keranjang[index].qty * keranjang[index].harga;
+        if (keranjang[index].qty <= 0) {
+            keranjang.splice(index, 1);
         }
-        renderKeranjang();
+    }
+    renderKeranjang();
+}
+
+function renderKeranjang() {
+    let tbody = document.getElementById("keranjang-body");
+    let totalElement = document.getElementById("total");
+    tbody.innerHTML = "";
+    let total = 0;
+
+    if (keranjang.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
+    } else {
+        keranjang.forEach(item => {
+            total += item.subtotal;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${item.nama}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang(${item.id})">-</button>
+                        ${item.qty}
+                        <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang(${item.id}, '${item.nama}', ${item.harga})">+</button>
+                    </td>
+                    <td>Rp ${item.harga.toLocaleString()}</td>
+                    <td>Rp ${item.subtotal.toLocaleString()}</td>
+                </tr>
+            `;
+        });
     }
 
-    function kurangiDariKeranjang(id) {
-        let index = keranjang.findIndex(item => item.id === id);
-        if (index !== -1) {
-            keranjang[index].qty--;
-            keranjang[index].subtotal = keranjang[index].qty * keranjang[index].harga;
+    totalElement.innerText = total.toLocaleString();
+}
 
-            if (keranjang[index].qty <= 0) {
-                keranjang.splice(index, 1);
-            }
-        }
-        renderKeranjang();
+function hitungKembalian() {
+    let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
+    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
+    let kembalian = jumlahTunai - total;
+    document.getElementById("kembalian").innerText = kembalian.toLocaleString();
+}
+
+function clearKeranjang() {
+    keranjang = [];
+    renderKeranjang();
+    document.getElementById("jumlah_tunai").value = "";
+    document.getElementById("kembalian").innerText = "0";
+}
+
+function prosesPembayaran() {
+    if (keranjang.length === 0) {
+        alert("Keranjang masih kosong!");
+        return;
     }
 
-    function renderKeranjang() {
-        let tbody = document.getElementById("keranjang-body");
-        let totalElement = document.getElementById("total");
-        tbody.innerHTML = "";
-        let total = 0;
-
-        if (keranjang.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Keranjang kosong</td></tr>`;
-        } else {
-            keranjang.forEach(item => {
-                total += item.subtotal;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.nama}</td>
-                        <td>
-                            <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang(${item.id})">
-                                <i class="bi bi-dash"></i>
-                            </button>
-                            ${item.qty}
-                            <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang(${item.id}, '${item.nama}', ${item.harga})">
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </td>
-                        <td>Rp ${item.subtotal.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        totalElement.innerText = total.toLocaleString();
+    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value);
+    if (isNaN(jumlahTunai)) {
+        alert("Masukkan jumlah tunai!");
+        return;
     }
 
-    function prosesPembayaran() {
-        if (keranjang.length === 0) {
-            alert("Keranjang masih kosong!");
-            return;
-        }
-
-        let dataTransaksi = {
-            barang_id: keranjang.map(item => item.id),
-            jumlah: keranjang.map(item => item.qty),
-            harga_jual: keranjang.map(item => item.harga),
-        };
-
-        fetch("{{ route('penjualan.store') }}", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(dataTransaksi)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Gagal memproses pembayaran");
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert("Pembayaran berhasil!");
-                keranjang = []; // Kosongkan keranjang setelah transaksi berhasil
-                renderKeranjang(); // Perbarui tampilan keranjang
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Terjadi kesalahan saat melakukan pembayaran.");
-            });
+    let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
+    if (jumlahTunai < total) {
+        alert("Jumlah tunai kurang dari total pembayaran!");
+        return;
     }
+
+    let dataTransaksi = {
+        pelanggan_id: document.getElementById("pelanggan_id")?.value || null,
+        barang_id: keranjang.map(item => item.id),
+        jumlah: keranjang.map(item => item.qty),
+        harga_jual: keranjang.map(item => item.harga),
+        jumlah_tunai: jumlahTunai,
+        kembalian: jumlahTunai - total,
+    };
+
+    console.log("Mengirim data transaksi:", dataTransaksi); // Debugging sebelum mengirim
+
+    fetch(document.querySelector('meta[name="route-penjualan"]').getAttribute('content'), {
+        method: "POST",
+        headers: {
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(dataTransaksi)
+    })
+    .then(response => response.json().then(data => {
+        if (!response.ok) {
+            throw new Error(data.message || "Gagal memproses pembayaran");
+        }
+        return data;
+    }))
+    .then(data => {
+        alert("Pembayaran berhasil!");
+        clearKeranjang();
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Terjadi kesalahan saat melakukan pembayaran: " + error.message);
+    });
+}
 </script>
 @endsection

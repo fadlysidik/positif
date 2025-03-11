@@ -50,7 +50,7 @@ class BarangController extends Controller
             'harga_jual' => $request->harga_jual,
             'stok' => $request->stok,
             'gambar' => $gambarPath,
-            'expired' => $request->expired,
+            'expired' => $request->expired ?? null,
             'user_id' => auth()->id(),
         ]);
 
@@ -74,7 +74,7 @@ class BarangController extends Controller
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'expired' => 'required|date',
+            'expired' => 'nullable|date',
         ]);
 
         $barang = Barang::findOrFail($id);
@@ -94,7 +94,7 @@ class BarangController extends Controller
             'harga_jual' => $request->harga_jual,
             'stok' => $request->stok,
             'gambar' => $gambarPath,
-            'expired' => $request->expired,
+            'expired' => $request->expired ?? null,
         ]);
 
         return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui.');
