@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('no_faktur', 50)->unique();
             $table->date('tgl_faktur');
             $table->double('total_bayar');
-            $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
+            $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggan')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

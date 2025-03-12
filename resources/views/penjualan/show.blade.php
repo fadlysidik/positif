@@ -1,125 +1,70 @@
-@extends('layouts.app')
+@extends('layout.kasir')
 
 @section('content')
-<div class="container">
-    <h2>Transaksi Penjualan</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <h4>Pilih Pelanggan</h4>
-            <select id="pelanggan_id" class="form-control">
-                <option value="">-- Pilih Pelanggan --</option>
-                @foreach ($pelanggan as $p)
-                <option value="{{ $p->id }}">{{ $p->nama }}</option>
-                @endforeach
-            </select>
-
-            <h4 class="mt-4">Pilih Barang</h4>
-            <ul class="list-group">
-                @foreach ($barang as $b)
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ $b->nama }} - Rp {{ number_format($b->harga_jual, 0, ',', '.') }}
-                    <button class="btn btn-sm btn-primary" onclick="tambahKeKeranjang({{ $b->id }}, '{{ $b->nama }}', {{ $b->harga_jual }})">
-                        Tambah
-                    </button>
-                </li>
-                @endforeach
-            </ul>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Detail Penjualan</h4>
+            <div>
+                <button class="btn btn-success me-2" onclick="printStruk()">Print</button>
+                <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">Kembali</a>
+            </div>
         </div>
 
-        <div class="col-md-6">
-            <h4>Keranjang</h4>
-            <table class="table">
-                <thead>
+        <div class="card-body" id="struk">
+            <table class="table table-borderless">
+                <tr>
+                    <td><strong>No Faktur</strong></td>
+                    <td>: {{ $penjualan->no_faktur }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Tanggal</strong></td>
+                    <td>: {{ date('d-m-Y H:i', strtotime($penjualan->tgl_faktur)) }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Pelanggan</strong></td>
+                    <td>: {{ $penjualan->pelanggan ? $penjualan->pelanggan->nama : 'Umum' }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Bayar</strong></td>
+                    <td>: Rp{{ number_format($penjualan->total_bayar, 0, ',', '.') }}</td>
+                </tr>
+            </table>
+
+            <h5 class="mt-4">Barang yang Dibeli</h5>
+            <table class="table table-bordered">
+                <thead class="text-center">
                     <tr>
-                        <th>Barang</th>
-                        <th>Qty</th>
+                        <th>Nama Barang</th>
+                        <th>Harga</th>
+                        <th>Jumlah</th>
                         <th>Subtotal</th>
                     </tr>
                 </thead>
-                <tbody id="keranjang-body">
+                <tbody>
+                    @foreach($penjualan->detailPenjualan as $detail)
                     <tr>
-                        <td colspan="3" class="text-center text-muted">Keranjang kosong</td>
+                        <td>{{ $detail->barang->nama_barang }}</td>
+                        <td class="text-end">Rp{{ number_format($detail->harga_jual, 0, ',', '.') }}</td>
+                        <td class="text-center">{{ $detail->jumlah }}</td>
+                        <td class="text-end">Rp{{ number_format($detail->sub_total, 0, ',', '.') }}</td>
                     </tr>
+                    @endforeach
                 </tbody>
             </table>
-            <h5>Total: Rp <span id="total">0</span></h5>
-            <button class="btn btn-success btn-lg btn-block" onclick="prosesPembayaran()">Bayar</button>
         </div>
     </div>
 </div>
 
 <script>
-    let keranjang = [];
+    function printStruk() {
+        var struk = document.getElementById('struk').innerHTML;
+        var originalContent = document.body.innerHTML;
 
-    function tambahKeKeranjang(id, nama, harga) {
-        let index = keranjang.findIndex(item => item.id === id);
-        if (index !== -1) {
-            keranjang[index].qty++;
-        } else {
-            keranjang.push({
-                id,
-                nama,
-                harga,
-                qty: 1
-            });
-        }
-        renderKeranjang();
-    }
-
-    function renderKeranjang() {
-        let tbody = document.getElementById("keranjang-body");
-        let totalElement = document.getElementById("total");
-        tbody.innerHTML = "";
-        let total = 0;
-
-        if (keranjang.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Keranjang kosong</td></tr>`;
-        } else {
-            keranjang.forEach(item => {
-                let subtotal = item.qty * item.harga;
-                total += subtotal;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.nama}</td>
-                        <td>${item.qty}</td>
-                        <td>Rp ${subtotal.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        totalElement.innerText = total.toLocaleString();
-    }
-
-    function prosesPembayaran() {
-        let pelangganId = document.getElementById("pelanggan_id").value;
-        if (keranjang.length === 0) {
-            alert("Keranjang masih kosong!");
-            return;
-        }
-
-        let data = {
-            pelanggan_id: pelangganId,
-            barang_id: keranjang.map(item => item.id),
-            jumlah: keranjang.map(item => item.qty),
-            harga_jual: keranjang.map(item => item.harga),
-            _token: "{{ csrf_token() }}"
-        };
-
-        fetch("{{ route('penjualan.store') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert("Pembayaran berhasil!");
-                keranjang = [];
-                renderKeranjang();
-            })
-            .catch(error => console.error("Error:", error));
+        document.body.innerHTML = struk;
+        window.print();
+        document.body.innerHTML = originalContent;
+        location.reload();
     }
 </script>
 @endsection

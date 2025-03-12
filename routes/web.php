@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/penjualan/store', [PenjualanController::class, 'store'])->name('penjualan.store');
     Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
     Route::get('/penjualan/{id}/pembayaran', [PenjualanController::class, 'pembayaran'])->name('penjualan.pembayaran');
-    Route::post('/penjualan/{id}/proses-pembayaran', [PenjualanController::class, 'prosesPembayaran'])->name('penjualan proses_pembayaran');
+    Route::post('/penjualan/{id}/proses-pembayaran', [PenjualanController::class, 'prosesPembayaran'])->name('penjualan.proses_pembayaran');
     Route::get('/penjualan/{id}/struk', [PenjualanController::class, 'struk'])->name('penjualan.struk');
 
     //pelanggan

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-       
+ 
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->id();
             $table->string('kode_pelanggan', 50)->unique();

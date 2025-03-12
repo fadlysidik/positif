@@ -11,14 +11,14 @@
                 @foreach ($pelanggan as $p)
                 <option value="{{ $p->id }}">{{ $p->nama }}</option>
                 @endforeach
-            </select>
+            </select>   
 
             <h4 class="mt-4">Pilih Barang</h4>
             <ul class="list-group">
                 @foreach ($barang as $b)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     {{ $b->nama }} - Rp {{ number_format($b->harga_jual, 0, ',', '.') }}
-                    <button class="btn btn-sm btn-primary" onclick="tambahKeKeranjang({{ $b->id }}, '{{ $b->nama }}', {{ $b->harga_jual }})">
+                    <button class="btn btn-sm btn-primary" onclick="tambahKeKeranjang('{{ $b->id }}', '{{ $b->nama }}', '{{ $b->harga_jual }}')">
                         Tambah
                     </button>
                 </li>

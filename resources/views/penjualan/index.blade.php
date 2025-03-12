@@ -10,6 +10,7 @@
                 <th>No Faktur</th>
                 <th>Tanggal</th>
                 <th>Total Bayar</th>
+                <th>Nama Pelanggan</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -19,6 +20,7 @@
                 <td>{{ $item->no_faktur }}</td>
                 <td>{{ date('d-m-Y H:i', strtotime($item->tgl_faktur)) }}</td>
                 <td>Rp{{ number_format($item->total_bayar, 0, ',', '.') }}</td>
+                <td>{{ $item->pelanggan ? $item->pelanggan->nama : 'Tidak Diketahui' }}</td>
                 <td>
                     <a href="#" class="btn btn-success btn-sm">Struk</a>
                     <a href="{{ route('penjualan.show', $item->id) }}" class="btn btn-info btn-sm">Detail</a>

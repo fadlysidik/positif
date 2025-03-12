@@ -14,6 +14,6 @@ class Pelanggan extends Model
 
     public function penjualan()
     {
-        return $this->hasMany(Penjualan::class, 'pelanggan_id');
+        return $this->hasMany(Penjualan::class,);
     }
 }
