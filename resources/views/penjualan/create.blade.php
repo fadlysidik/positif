@@ -37,7 +37,6 @@
                         <tr>
                             <th>Item</th>
                             <th>Qty</th>
-                            <th>Harga</th>
                             <th>Subtotal</th>
                         </tr>
                     </thead>
@@ -47,7 +46,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <h5>Total: Rp <span id="total">0</span></h5>
+                <h5>Total: Rp <span id="total"></span></h5>
 
                 <hr>
 
@@ -142,33 +141,38 @@
     }
 
     function renderKeranjang() {
-        let tbody = document.getElementById("keranjang-body");
-        let totalElement = document.getElementById("total");
-        tbody.innerHTML = "";
-        let total = 0;
+    let tbody = document.getElementById("keranjang-body");
+    let totalElement = document.getElementById("total");
+    tbody.innerHTML = "";
+    let total = ''; 
 
-        if (keranjang.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
-        } else {
-            keranjang.forEach(item => {
-                total += item.subtotal;
-                tbody.innerHTML += `
-                <tr>
-                    <td>${item.nama}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang(${item.id})">-</button>
-                        ${item.qty}
-                        <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang(${item.id}, '${item.nama}', ${item.harga})">+</button>
-                    </td>
-                    <td>Rp ${item.harga.toLocaleString()}</td>
-                    <td>Rp ${item.subtotal.toLocaleString()}</td>
-                </tr>
-            `;
-            });
-        }
+    if (keranjang.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
+    } else {
+        keranjang.forEach(item => {
+            let subtotal = item.qty * item.harga; 
+            total += subtotal; 
 
-        totalElement.innerText = total.toLocaleString();
+            tbody.innerHTML += `
+            <tr>
+                <td>${item.nama}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang('${item.id}')">-</button>
+                    ${item.qty}
+                    <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang('${item.id}', '${item.nama}', ${item.harga}, ${item.stok})">+</button>
+                </td>
+                <td>Rp ${subtotal.toLocaleString()}</td>
+            </tr>`;
+        });
     }
+
+    
+    totalElement.innerText = `${total.toLocaleString()}`;
+
+    
+    hitungKembalian();
+}
+
 
     function hitungKembalian() {
         let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);

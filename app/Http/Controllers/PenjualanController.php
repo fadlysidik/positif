@@ -150,15 +150,4 @@ class PenjualanController extends Controller
 
         return redirect()->route('penjualan.struk', $id)->with('success', 'Pembayaran berhasil!');
     }
-
-    public function struk($id)
-    {
-        $penjualan = Penjualan::with('detailPenjualan.barang')->findOrFail($id);
-
-        if (!$penjualan) {
-            return redirect()->route('penjualan.index')->with('error', 'Penjualan tidak ditemukan');
-        }
-
-        return view('penjualan.struk', compact('penjualan'));
-    }
 }

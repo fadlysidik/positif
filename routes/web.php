@@ -9,6 +9,7 @@ use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SettingController;
+use App\Models\DetailPenjualan;
 use Illuminate\Support\Facades\Route;
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -64,7 +65,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
     Route::get('/penjualan/{id}/pembayaran', [PenjualanController::class, 'pembayaran'])->name('penjualan.pembayaran');
     Route::post('/penjualan/{id}/proses-pembayaran', [PenjualanController::class, 'prosesPembayaran'])->name('penjualan.proses_pembayaran');
-    Route::get('/penjualan/{id}/struk', [PenjualanController::class, 'struk'])->name('penjualan.struk');
+    Route::get('/penjualan/{id}/detail', function ($id) {
+        $details = DetailPenjualan::where('penjualan_id', $id)
+            ->with('barang')
+            ->get()
+            ->map(function ($detail) {
+                return [
+                    'nama_barang' => $detail->barang->nama_barang,
+                    'jumlah' => $detail->jumlah,
+                    'sub_total' => $detail->sub_total
+                ];
+            });
+
+        return response()->json($details);
+    });
 
     //pelanggan
     Route::resource('pelanggan', PelangganController::class);

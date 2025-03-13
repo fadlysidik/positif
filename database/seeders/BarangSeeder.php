@@ -25,7 +25,7 @@ class BarangSeeder extends Seeder
                 'satuan' => $satuan[array_rand($satuan)],
                 'harga_jual' => rand(10000, 50000),
                 'stok' => rand(10, 100),
-                'gambar' => null, // Bisa diisi dengan path gambar jika ada
+                'gambar' => null,
                 'expired' => $now->addDays(rand(30, 365)),
                 'user_id' => 1, // Ubah sesuai user yang ada
                 'created_at' => now(),

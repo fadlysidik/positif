@@ -22,7 +22,7 @@ return new class extends Migration
             $table->double('harga_jual');
             $table->integer('stok');
             $table->string('gambar')->nullable();
-            $table->dateTime('expired');
+            $table->dateTime('expired')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

@@ -32,10 +32,10 @@
                         <td>{{ $item->satuan }}</td>
                         <td>{{ number_format($item->harga_jual, 2) }}</td>
                         <td>{{ $item->stok }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->expired)->format('d-m-Y H:i') }}</td>
+                        <td>{{ $item->expired }}</td>
                         <td>
                             @if($item->gambar)
-                                <img src="{{ asset('storage/' . $item->gambar) }}" alt="Gambar Barang" width="50">
+                                <img src="{{ asset('storage/' . $item->gambar) }}" alt="" width="50">
                             @else
                                 <span class="text-muted">Tidak ada gambar</span>
                             @endif

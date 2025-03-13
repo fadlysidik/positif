@@ -29,18 +29,16 @@ class BarangController extends Controller
             'satuan' => 'required|max:10',
             'harga_jual' => 'required|numeric',
             'stok' => 'required|integer',
-            'gambar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'expired' => 'required|date',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'expired' => 'nullable|date',
         ]);
 
-        // Generate kode barang unik
         $date = date('Ymd');
         $lastBarang = Barang::whereDate('created_at', now()->toDateString())->latest()->first();
         $number = $lastBarang ? intval(substr($lastBarang->kode_barang, -4)) + 1 : 1;
         $kodeBarang = 'BRG-' . $date . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
 
-        // Simpan gambar
-        $gambarPath = $request->file('gambar')->store('barang_images', 'public');
+        $gambarPath = $request->hasFile('gambar') ? $request->file('gambar')->store('barang_images', 'public') : null;
 
         Barang::create([
             'kode_barang' => $kodeBarang,
@@ -79,7 +77,6 @@ class BarangController extends Controller
 
         $barang = Barang::findOrFail($id);
 
-        // Jika ada gambar baru, hapus yang lama dan simpan yang baru
         if ($request->hasFile('gambar')) {
             Storage::disk('public')->delete($barang->gambar);
             $gambarPath = $request->file('gambar')->store('barang_images', 'public');
@@ -100,12 +97,15 @@ class BarangController extends Controller
         return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
+
     public function destroy($id)
     {
         $barang = Barang::findOrFail($id);
 
-        // Hapus gambar dari penyimpanan
-        Storage::disk('public')->delete($barang->gambar);
+        // Hanya hapus gambar jika ada
+        if ($barang->gambar) {
+            Storage::disk('public')->delete($barang->gambar);
+        }
 
         $barang->delete();
 

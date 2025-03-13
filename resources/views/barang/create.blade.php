@@ -50,7 +50,6 @@
                 <option value="lusin" {{ old('satuan', $barang->satuan ?? '') == 'lusin' ? 'selected' : '' }}>Lusin</option>
                 <option value="kodi" {{ old('satuan', $barang->satuan ?? '') == 'kodi' ? 'selected' : '' }}>Kodi</option>
                 <option value="kg" {{ old('satuan', $barang->satuan ?? '') == 'kg' ? 'selected' : '' }}>Kilogram</option>
-                <option value="gram" {{ old('satuan', $barang->satuan ?? '') == 'gram' ? 'selected' : '' }}>Gram</option>
                 <option value="gram" {{ old('satuan', $barang->satuan ?? '') == 'gram' ? 'selected' : '' }}>Pasang</option>
                 <option value="gram" {{ old('satuan', $barang->satuan ?? '') == 'gram' ? 'selected' : '' }}>Botol</option>
             </select>

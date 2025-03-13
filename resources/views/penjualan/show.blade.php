@@ -5,10 +5,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Detail Penjualan</h4>
-            <div>
-                <button class="btn btn-success me-2" onclick="printStruk()">Print</button>
-                <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">Kembali</a>
-            </div>
+            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary">Kembali</a>
         </div>
 
         <div class="card-body" id="struk">
@@ -55,16 +52,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    function printStruk() {
-        var struk = document.getElementById('struk').innerHTML;
-        var originalContent = document.body.innerHTML;
-
-        document.body.innerHTML = struk;
-        window.print();
-        document.body.innerHTML = originalContent;
-        location.reload();
-    }
-</script>
 @endsection

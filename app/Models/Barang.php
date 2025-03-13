@@ -11,6 +11,9 @@ class Barang extends Model
 
     protected $table = 'barang';
     protected $fillable = ['kode_barang', 'produk_id', 'nama_barang', 'satuan', 'harga_jual', 'stok', 'gambar', 'expired', 'user_id'];
+    // protected $casts = [
+    //     'expired' => 'datetime:Y-m-d H:i',
+    // ];
 
     public function produk()
     {
