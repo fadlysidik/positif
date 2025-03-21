@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container mt-4">
+    <a href="{{ route('dashboard.kasir') }}" class="btn btn-secondary">Kembali</a>
     <h4 class="mb-3">Daftar Penjualan</h4>
 
     <table class="table table-bordered">

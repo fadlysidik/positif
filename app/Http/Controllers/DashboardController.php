@@ -53,6 +53,35 @@ class DashboardController extends Controller
     // Untuk Pemilik
     public function pemilikDashboard()
     {
-        return view('dashboard.pemilik'); // Tampilan dashboard pemilik
+        $totalBarang = Barang::count();
+        $totalPembelian = Pembelian::sum('total');
+        $totalPenjualan = Penjualan::sum('total_bayar');
+        $totalPelanggan = Pelanggan::count();
+        $labaBersih = $totalPenjualan - $totalPembelian;
+
+        // Grafik Penjualan Bulanan
+        $penjualanData = Penjualan::select(
+            DB::raw('MONTH(tgl_faktur) as bulan'),
+            DB::raw('SUM(total_bayar) as total')
+        )
+            ->groupBy('bulan')
+            ->orderBy('bulan', 'asc')
+            ->get();
+
+        $bulanPenjualan = $penjualanData->pluck('bulan')->map(function ($bulan) {
+            return date("F", mktime(0, 0, 0, $bulan, 1));
+        });
+
+        $jumlahPenjualan = $penjualanData->pluck('total');
+
+        return view('dashboard.pemilik', compact(
+            'totalBarang',
+            'totalPembelian',
+            'totalPenjualan',
+            'totalPelanggan',
+            'labaBersih',
+            'bulanPenjualan',
+            'jumlahPenjualan'
+        ));
     }
 }

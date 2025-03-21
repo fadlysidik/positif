@@ -69,7 +69,7 @@
                     <input type="number" class="form-control" id="jumlah_tunai" oninput="hitungKembalian()">
                 </div>
 
-                <h5>Kembalian: Rp <span id="kembalian">0</span></h5>
+                <h5>Kembalian: Rp <span id="kembalian"></span></h5>
 
                 <button class="btn btn-danger btn-block" onclick="clearKeranjang()">Clear</button>
                 <button class="btn btn-primary btn-block" onclick="prosesPembayaran()">Bayar</button>
@@ -124,10 +124,6 @@
         renderKeranjang();
     }
 
-
-
-
-
     function kurangiDariKeranjang(id) {
         let index = keranjang.findIndex(item => item.id === id);
         if (index !== -1) {
@@ -144,14 +140,14 @@
     let tbody = document.getElementById("keranjang-body");
     let totalElement = document.getElementById("total");
     tbody.innerHTML = "";
-    let total = ''; 
+    let total = 0; // Perbaikan dari string ke angka
 
     if (keranjang.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
     } else {
         keranjang.forEach(item => {
             let subtotal = item.qty * item.harga; 
-            total += subtotal; 
+            total += subtotal;  // Sekarang total bertambah dengan benar
 
             tbody.innerHTML += `
             <tr>
@@ -166,20 +162,25 @@
         });
     }
 
-    
-    totalElement.innerText = `${total.toLocaleString()}`;
-
-    
+    totalElement.innerText = `${total.toLocaleString()}`; // Format angka rupiah
     hitungKembalian();
 }
 
 
-    function hitungKembalian() {
-        let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
-        let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
-        let kembalian = jumlahTunai - total;
-        document.getElementById("kembalian").innerText = kembalian.toLocaleString();
-    }
+
+function hitungKembalian() {
+    let total = keranjang.reduce((sum, item) => sum + (item.qty * item.harga), 0);
+    let jumlahTunai = document.getElementById("jumlah_tunai").value;
+
+    // Pastikan jumlah tunai diubah menjadi angka yang valid
+    jumlahTunai = jumlahTunai ? parseFloat(jumlahTunai.replace(/[^0-9.]/g, '')) || 0 : 0;
+
+    let kembalian = jumlahTunai - total;
+
+    // Jika hasilnya NaN atau tidak valid, tampilkan 0
+    document.getElementById("kembalian").innerText = isNaN(kembalian) ? "0" : `Rp ${kembalian.toLocaleString()}`;
+}
+
 
     function clearKeranjang() {
         Swal.fire({
