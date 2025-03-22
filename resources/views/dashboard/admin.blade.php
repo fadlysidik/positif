@@ -46,7 +46,7 @@
     <!-- Grafik Penjualan -->
     <div class="card mt-4">
         <div class="card-header">
-            <h5>Grafik Penjualan Bulanan</h5>
+            <h5>Grafik Penjualan & Keuntungan</h5>
         </div>
         <div class="card-body">
             <canvas id="penjualanChart"></canvas>
@@ -57,28 +57,62 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('penjualanChart').getContext('2d');
-    const penjualanChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($bulanPenjualan) !!},
-            datasets: [{
-                label: 'Penjualan',
-                data: {!! json_encode($jumlahPenjualan) !!},
-                backgroundColor: '#29B6F6',
-                borderColor: '#29B6F6',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('penjualanChart').getContext('2d');
+
+        const penjualanChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($bulanPenjualan) !!},
+                datasets: [
+                    {
+                        label: 'Penjualan',
+                        data: {!! json_encode($jumlahPenjualan) !!},
+                        borderColor: '#29B6F6',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Keuntungan',
+                        data: {!! json_encode($jumlahKeuntungan) !!},
+                        borderColor: "#4CAF50",
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                let value = tooltipItem.raw;
+                                return tooltipItem.dataset.label + ': Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                            }
+                        }
+                    }
                 }
             }
-        }
+        });
     });
 </script>
 @endsection

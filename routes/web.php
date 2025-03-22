@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->get('/dashboard/admin', [DashboardController::class, 'index'])->name('dashboard.admin');
     Route::middleware('role:kasir')->get('/dashboard/kasir', [DashboardController::class, 'kasirDashboard'])->name('dashboard.kasir');
     Route::middleware('role:pemilik')->get('/dashboard/pemilik', [DashboardController::class, 'pemilikDashboard'])->name('dashboard.pemilik');
+    Route::middleware('role:member')->get('/dashboard/member', [DashboardController::class, 'memberDashboard'])->name('dashboard.member');
 
     // **PEMASOK**
     Route::resource('pemasok', PemasokController::class);
@@ -83,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengajuan_barang', PengajuanBarangController::class);
     Route::post('/pengajuan_barang', [PengajuanBarangController::class, 'store'])->middleware('web');
     Route::get('/pengajuan_barang/{id}', [PengajuanBarangController::class, 'show']);
+    Route::put('/pengajuan_barang/toggleStatus/{id}', [PengajuanBarangController::class, 'toggleStatus']);
     Route::get('/pengajuan_barang/export/excel', [PengajuanBarangController::class, 'exportExcel'])->name('pengajuan.export.excel');
     Route::get('/pengajuan_barang/export/pdf', [PengajuanBarangController::class, 'exportPDF'])->name('pengajuan.export.pdf');
 

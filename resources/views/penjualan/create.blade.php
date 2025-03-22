@@ -170,15 +170,12 @@
 
 function hitungKembalian() {
     let total = keranjang.reduce((sum, item) => sum + (item.qty * item.harga), 0);
-    let jumlahTunai = document.getElementById("jumlah_tunai").value;
-
-    // Pastikan jumlah tunai diubah menjadi angka yang valid
-    jumlahTunai = jumlahTunai ? parseFloat(jumlahTunai.replace(/[^0-9.]/g, '')) || 0 : 0;
+    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
 
     let kembalian = jumlahTunai - total;
 
     // Jika hasilnya NaN atau tidak valid, tampilkan 0
-    document.getElementById("kembalian").innerText = isNaN(kembalian) ? "0" : `Rp ${kembalian.toLocaleString()}`;
+    document.getElementById("kembalian").innerText = kembalian >= 0 ? kembalian.toLocaleString() : "0";
 }
 
 
@@ -207,78 +204,73 @@ function hitungKembalian() {
 
 
     function prosesPembayaran() {
-        if (keranjang.length === 0) {
-            Swal.fire({
-                icon: "warning",
-                title: "Keranjang Kosong",
-                text: "Tambahkan barang terlebih dahulu!",
-            });
-            return;
-        }
+    if (keranjang.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Keranjang Kosong",
+            text: "Tambahkan barang terlebih dahulu!",
+        });
+        return;
+    }
 
-        let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value);
-        if (isNaN(jumlahTunai)) {
-            Swal.fire({
-                icon: "warning",
-                title: "Input Tidak Valid",
-                text: "Masukkan jumlah tunai yang valid!",
-            });
-            return;
-        }
+    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
+    let total = keranjang.reduce((sum, item) => sum * item.subtotal, 0);
 
-        let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
-        if (jumlahTunai < total) {
+    console.log("Total: ", total);
+    console.log("Jumlah Tunai: ", jumlahTunai);
+
+    if (jumlahTunai < total) {
+        Swal.fire({
+            icon: "error",
+            title: "Pembayaran Gagal",
+            text: "Jumlah tunai kurang dari total pembayaran!",
+        });
+        return;
+    }
+
+    let dataTransaksi = {
+        pelanggan_id: document.getElementById("pelanggan_id")?.value || null,
+        barang_id: keranjang.map(item => item.id),
+        jumlah: keranjang.map(item => item.qty),
+        harga_jual: keranjang.map(item => item.harga),
+        jumlah_tunai: jumlahTunai,
+        kembalian: jumlahTunai - total,
+    };
+
+    fetch(document.querySelector('meta[name="route-penjualan"]').getAttribute('content'), {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(dataTransaksi)
+        })
+        .then(response => response.json().then(data => {
+            if (!response.ok) {
+                throw new Error(data.message || "Gagal memproses pembayaran");
+            }
+            return data;
+        }))
+        .then(data => {
+            Swal.fire({
+                icon: "success",
+                title: "Pembayaran Berhasil",
+                text: "Transaksi berhasil disimpan!",
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = data.redirect; // Redirect ke halaman tujuan
+            });
+        })
+        .catch(error => {
+            console.error("Error:", error);
             Swal.fire({
                 icon: "error",
-                title: "Pembayaran Gagal",
-                text: "Jumlah tunai kurang dari total pembayaran!",
+                title: "Terjadi Kesalahan",
+                text: error.message,
             });
-            return;
-        }
-
-        let dataTransaksi = {
-            pelanggan_id: document.getElementById("pelanggan_id")?.value || null,
-            barang_id: keranjang.map(item => item.id),
-            jumlah: keranjang.map(item => item.qty),
-            harga_jual: keranjang.map(item => item.harga),
-            jumlah_tunai: jumlahTunai,
-            kembalian: jumlahTunai - total,
-        };
-
-        fetch(document.querySelector('meta[name="route-penjualan"]').getAttribute('content'), {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(dataTransaksi)
-            })
-            .then(response => response.json().then(data => {
-                if (!response.ok) {
-                    throw new Error(data.message || "Gagal memproses pembayaran");
-                }
-                return data;
-            }))
-            .then(data => {
-                Swal.fire({
-                    icon: "success",
-                    title: "Pembayaran Berhasil",
-                    text: "Transaksi berhasil disimpan!",
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    window.location.href = data.redirect; // Redirect ke halaman tujuan
-                });
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Terjadi Kesalahan",
-                    text: error.message,
-                });
-            });
-    }
+        });
+}
 </script>
 @endsection

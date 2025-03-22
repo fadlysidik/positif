@@ -27,10 +27,12 @@
                     <td>{{ $p->email }}</td>
                     <td>
                         <a href="{{ route('pelanggan.edit', $p->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{{ route('pelanggan.destroy', $p->id) }}" method="POST" class="d-inline">
+                    
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete({{ $p->id }})">Hapus</button>
+                    
+                        <form id="delete-form-{{ $p->id }}" action="{{ route('pelanggan.destroy', $p->id) }}" method="POST" style="display: none;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
                         </form>
                     </td>
                 </tr>
@@ -38,4 +40,35 @@
         </tbody>
     </table>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: "Sukses!",
+        text: "{{ session('success') }}",
+        icon: "success",
+        timer: 3000,
+        showConfirmButton: false
+    });
+    
+    function confirmDelete(id) {
+    Swal.fire({
+        title: "Apakah Anda yakin?",
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+</script>
+@endif
+
 @endsection

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('kode_pengajuan');
             $table->date('tgl_pengajuan');
             $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
-            $table->foreignId('barang_id')->constrained('barang')->onDelete('cascade');
+            $table->string('nama_barang', 100);
             $table->integer('jumlah')->default(1);
             $table->text('deskripsi')->nullable();
             $table->boolean('status')->default(0);

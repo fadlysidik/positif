@@ -16,7 +16,7 @@ class PengajuanBarang extends Model
         'kode_pengajuan',
         'tgl_pengajuan',
         'pelanggan_id',
-        'barang_id',
+        'nama_barang',
         'jumlah',
         'deskripsi',
         'status',
@@ -39,19 +39,16 @@ class PengajuanBarang extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->kode_pengajuan = 'PGJ-' . strtoupper(Str::random(6)); // Format: PGJ-XXXXXX
+            $model->kode_pengajuan = 'PGJ-' . strtoupper(Str::random(6));
         });
     }
+
 
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
     }
 
-    public function barang()
-    {
-        return $this->belongsTo(Barang::class, 'barang_id');
-    }
 
     public function user()
     {

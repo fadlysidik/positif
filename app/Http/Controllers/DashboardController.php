@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $totalPenjualan = Penjualan::sum('total_bayar');
         $totalPelanggan = Pelanggan::count();
 
-        // Grafik Penjualan Bulanan
+        // Ambil data penjualan per bulan
         $penjualanData = Penjualan::select(
             DB::raw('MONTH(tgl_faktur) as bulan'),
             DB::raw('SUM(total_bayar) as total')
@@ -28,11 +28,32 @@ class DashboardController extends Controller
             ->orderBy('bulan', 'asc')
             ->get();
 
+        // Ambil data pembelian per bulan
+        $pembelianData = Pembelian::select(
+            DB::raw('MONTH(tanggal_masuk) as bulan'),
+            DB::raw('SUM(total) as total')
+        )
+            ->groupBy('bulan')
+            ->orderBy('bulan', 'asc')
+            ->get();
+
+        // Konversi angka bulan ke nama bulan
         $bulanPenjualan = $penjualanData->pluck('bulan')->map(function ($bulan) {
             return date("F", mktime(0, 0, 0, $bulan, 1));
         });
 
         $jumlahPenjualan = $penjualanData->pluck('total');
+        $jumlahPembelian = $pembelianData->pluck('total');
+
+        // Hitung keuntungan: Penjualan - Pembelian
+        $jumlahKeuntungan = [];
+        foreach ($jumlahPenjualan as $key => $penjualan) {
+            $pembelian = $jumlahPembelian[$key] ?? 0; // Jika tidak ada pembelian, gunakan 0
+            $jumlahKeuntungan[] = $penjualan - $pembelian;
+        }
+
+        // Pendapatan di sini bisa dianggap sebagai total penjualan
+        $jumlahPendapatan = $jumlahPenjualan;
 
         return view('dashboard.admin', compact(
             'totalBarang',
@@ -40,7 +61,9 @@ class DashboardController extends Controller
             'totalPenjualan',
             'totalPelanggan',
             'bulanPenjualan',
-            'jumlahPenjualan'
+            'jumlahPenjualan',
+            'jumlahKeuntungan',
+            'jumlahPendapatan'
         ));
     }
 
@@ -83,5 +106,11 @@ class DashboardController extends Controller
             'bulanPenjualan',
             'jumlahPenjualan'
         ));
+    }
+
+    // Untuk Member
+    public function memberDashboard()
+    {
+        return view('dashboard.member');
     }
 }

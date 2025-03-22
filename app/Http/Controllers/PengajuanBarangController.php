@@ -18,11 +18,11 @@ class PengajuanBarangController extends Controller
      */
     public function index()
     {
-        $pengajuan = PengajuanBarang::with(['pelanggan', 'barang'])->latest()->get();
+        $pengajuan = PengajuanBarang::with(['pelanggan'])->latest()->get();
         $pelanggan = Pelanggan::all();
-        $barang = Barang::all();
 
-        return view('pengajuan_barang.index', compact('pengajuan', 'pelanggan', 'barang'));
+
+        return view('pengajuan_barang.index', compact('pengajuan', 'pelanggan'));
     }
 
     /**
@@ -32,7 +32,7 @@ class PengajuanBarangController extends Controller
     {
         $request->validate([
             'pelanggan_id' => 'required|exists:pelanggan,id',
-            'barang_id' => 'required|exists:barang,id',
+            'nama_barang' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string|max:255',
         ]);
@@ -40,15 +40,26 @@ class PengajuanBarangController extends Controller
         PengajuanBarang::create([
             'tgl_pengajuan' => now(),
             'pelanggan_id' => $request->pelanggan_id,
-            'barang_id' => $request->barang_id,
+            'nama_barang' => $request->nama_barang,
             'jumlah' => $request->jumlah,
             'deskripsi' => $request->deskripsi,
             'status' => 0,
             'user_id' => Auth::id(),
         ]);
 
-        return response()->json(['success' => 'Pengajuan barang berhasil ditambahkan!']);
+        return redirect()->back()->with('success', 'Pengajuan barang berhasil ditambahkan!');
     }
+
+    /**
+     * Menampilkan form edit pengajuan barang.
+     */
+    // public function edit($id)
+    // {
+    //     $pengajuan = PengajuanBarang::findOrFail($id);
+    //     $pelanggan = Pelanggan::all();
+
+    //     return view('pengajuan_barang.edit', compact('pengajuan', 'pelanggan'));
+    // }
 
     /**
      * Mengupdate data pengajuan barang.
@@ -57,7 +68,7 @@ class PengajuanBarangController extends Controller
     {
         $request->validate([
             'pelanggan_id' => 'required|exists:pelanggan,id',
-            'barang_id' => 'required|exists:barang,id',
+            'nama_barang' => 'required|string|max:255',
             'jumlah' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string|max:255',
         ]);
@@ -65,12 +76,12 @@ class PengajuanBarangController extends Controller
         $pengajuan = PengajuanBarang::findOrFail($id);
         $pengajuan->update([
             'pelanggan_id' => $request->pelanggan_id,
-            'barang_id' => $request->barang_id,
+            'nama_barang' => $request->nama_barang,
             'jumlah' => $request->jumlah,
             'deskripsi' => $request->deskripsi,
         ]);
 
-        return response()->json(['success' => 'Pengajuan barang berhasil diperbarui!']);
+        return redirect()->route('pengajuan_barang.index')->with('success', 'Pengajuan barang berhasil diperbarui!');
     }
 
     /**
@@ -81,8 +92,12 @@ class PengajuanBarangController extends Controller
         $pengajuan = PengajuanBarang::findOrFail($id);
         $pengajuan->delete();
 
-        return response()->json(['success' => 'Pengajuan barang berhasil dihapus!']);
+        return redirect()->back()->with('success', 'Pengajuan barang berhasil dihapus!');
     }
+
+    /**
+     * Mengubah status pengajuan barang.
+     */
     public function toggleStatus(Request $request, $id)
     {
         $pengajuan = PengajuanBarang::findOrFail($id);
@@ -99,22 +114,37 @@ class PengajuanBarangController extends Controller
         $pengajuan->save();
 
         return response()->json([
-            'success' => 'Status pengajuan barang diperbarui!',
-            'status' => $pengajuan->status ? 'Terpenuhi' : 'Belum Terpenuhi'
+            'success' => true,
+            'message' => 'Status pengajuan barang diperbarui!',
+            'status' => $pengajuan->status
         ]);
     }
 
+    /**
+     * Menampilkan detail pengajuan barang.
+     */
     public function show($id)
     {
-        $pengajuan = PengajuanBarang::findOrFail($id);
+        $pengajuan = PengajuanBarang::with('pelanggan')->find($id);
+
+        if (!$pengajuan) {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
+
         return response()->json($pengajuan);
     }
 
+    /**
+     * Export data ke Excel.
+     */
     public function exportExcel()
     {
         return Excel::download(new PengajuanBarangExport, 'pengajuan_barang.xlsx');
     }
 
+    /**
+     * Export data ke PDF.
+     */
     public function exportPDF()
     {
         $pengajuan = PengajuanBarang::with(['pelanggan', 'barang'])->get();

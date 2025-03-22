@@ -37,6 +37,8 @@ class AuthController extends Controller
                     return redirect()->route('dashboard.kasir'); // Dashboard untuk kasir
                 case 'pemilik':
                     return redirect()->route('dashboard.pemilik'); // Dashboard untuk pemilik
+                case 'member':
+                    return redirect()->route('dashboard.member'); // Dashboard untuk pemilik
                 default:
                     return redirect()->route('dashboard'); // Default fallback jika role tidak dikenal
             }

@@ -30,7 +30,7 @@
             <tr>
                 <td>{{ $item->kode_pengajuan }}</td>
                 <td>{{ $item->pelanggan->nama }}</td>
-                <td>{{ $item->barang->nama_barang }}</td>
+                <td>{{ $item->nama_barang }}</td>
                 <td>{{ $item->jumlah }}</td>
                 <td>{{ $item->deskripsi }}</td>
                 <td>
@@ -71,12 +71,8 @@
                     </div>
                 
                     <div class="mb-3">
-                        <label for="barang_id" class="form-label">Barang</label>
-                        <select id="barang_id" name="barang_id" class="form-control">
-                            @foreach ($barang as $b)
-                                <option value="{{ $b->id }}">{{ $b->nama_barang }}</option>
-                            @endforeach
-                        </select>
+                        <label for="nama_barang" class="form-label">Nama Barang</label>
+                        <input type="text" id="nama_barang" name="nama_barang" class="form-control" required>
                     </div>
                 
                     <div class="mb-3">
@@ -114,7 +110,7 @@
         $.get("/pengajuan_barang/" + id, function (data) {
             $('#pengajuan_id').val(data.id);
             $('#pelanggan_id').val(data.pelanggan_id);
-            $('#barang_id').val(data.barang_id);
+            $('#nama_barang').val(data.nama_barang);
             $('#jumlah').val(data.jumlah);
             $('#deskripsi').val(data.deskripsi);
             $('#modalPengajuan').modal('show');

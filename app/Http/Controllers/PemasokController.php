@@ -13,6 +13,7 @@ class PemasokController extends Controller
         return view('pemasok.index', compact('pemasok'));
     }
 
+
     public function create()
     {
         return view('pemasok.create');

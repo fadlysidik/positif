@@ -14,7 +14,7 @@ class BarangSeeder extends Seeder
      */
     public function run(): void
     {
-        $satuan = ['pcs', 'lusin', 'kodi', 'kg', 'gram', 'pasang', 'botol'];
+        $satuan = ['pcs', 'lusin', 'kodi', 'kg', 'pasang', 'botol'];
         $now = Carbon::now();
 
         for ($i = 1; $i <= 10; $i++) {
@@ -27,7 +27,7 @@ class BarangSeeder extends Seeder
                 'stok' => rand(10, 100),
                 'gambar' => null,
                 'expired' => $now->addDays(rand(30, 365)),
-                'user_id' => 1, // Ubah sesuai user yang ada
+                'user_id' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
