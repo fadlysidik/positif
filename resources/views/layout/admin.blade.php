@@ -12,6 +12,9 @@
 
     <title>POS System</title>
 
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- Custom fonts for this template-->
     <link href="{{ asset('assets') }}/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" 
@@ -80,7 +83,7 @@
                 <a class="nav-link collapsed" href="{{ route('pelanggan.index') }}" data-target="#collapseFive"
                     aria-expanded="true" aria-controls="collapseFive">
                     <i class="fas fa-user-tag"></i>
-                    <span>Pelanggan</span>
+                    <span>Member</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -133,6 +136,7 @@
                     <!-- Topbar Search -->
                     <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                     </form>
+
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -221,15 +225,17 @@
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('assets') }}/vendor/jquery/jquery.min.js"></script>
+    <script src="{{ asset('assets')}}/vendor/jquery/jquery.min.js"></script>
     <script src="{{ asset('assets') }}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('assets') }}/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="{{ asset('assets') }}/js/sb-admin-2.min.js"></script>
-    @yield('scripts')
+    @stack('scripts')
     
 </body>
 

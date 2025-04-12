@@ -30,7 +30,7 @@
                         <td>{{ $item->nama_barang }}</td>
                         <td>{{ $item->produk->nama_produk }}</td>
                         <td>{{ $item->satuan }}</td>
-                        <td>{{ number_format($item->harga_jual, 2) }}</td>
+                        <td>{{ number_format($item->harga_jual) }}</td>
                         <td>{{ $item->stok }}</td>
                         <td>{{ $item->expired }}</td>
                         <td>

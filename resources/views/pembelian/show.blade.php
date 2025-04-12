@@ -4,6 +4,8 @@
 <div class="container mx-auto">
     <h2 class="text-2xl font-bold mb-4">Detail Pembelian: {{ $pembelian->kode_masuk }}</h2>
 
+    <a href="{{ route('pembelian.index') }}" class="btn btn-secondary mb-3">Kembali</a>
+
     <table class="w-full border">
         <thead>
             <tr class="bg-gray-200">

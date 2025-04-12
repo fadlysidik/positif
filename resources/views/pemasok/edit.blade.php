@@ -7,7 +7,6 @@
 
     <div class="card">
         <div class="card-body">
-            {{-- Tampilkan error validasi --}}
             @if($errors->any())
                 <div class="alert alert-danger">
                     <ul class="mb-0">
@@ -18,7 +17,6 @@
                 </div>
             @endif
 
-            {{-- Form tambah/edit --}}
             <form action="{{ isset($pemasok) ? route('pemasok.update', $pemasok->id) : route('pemasok.store') }}" method="POST">
                 @csrf
                 @if(isset($pemasok))
@@ -27,22 +25,26 @@
 
                 <div class="mb-3">
                     <label for="nama" class="form-label">Nama</label>
-                    <input type="text" name="nama" id="nama" class="form-control" value="{{ old('nama', $pemasok->nama ?? '') }}" required>
+                    <input type="text" name="nama" id="nama" class="form-control"
+                        value="{{ old('nama', $pemasok->nama ?? '') }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="alamat" class="form-label">Alamat</label>
-                    <input type="text" name="alamat" id="alamat" class="form-control" value="{{ old('alamat', $pemasok->alamat ?? '') }}" required>
+                    <input type="text" name="alamat" id="alamat" class="form-control"
+                        value="{{ old('alamat', $pemasok->alamat ?? '') }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="no_telp" class="form-label">No. Telepon</label>
-                    <input type="text" name="no_telp" id="no_telp" class="form-control" value="{{ old('no_telp', $pemasok->no_telp ?? '') }}" required>
+                    <input type="text" name="no_telp" id="no_telp" class="form-control"
+                        value="{{ old('no_telp', $pemasok->no_telp ?? '') }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $pemasok->email ?? '') }}">
+                    <input type="email" name="email" id="email" class="form-control"
+                        value="{{ old('email', $pemasok->email ?? '') }}">
                 </div>
 
                 <button type="submit" class="btn btn-success">

@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
- 
+
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->id();
             $table->string('kode_pelanggan', 50)->unique();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nama');
             $table->string('alamat', 200);
             $table->string('no_telp', 20);

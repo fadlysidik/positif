@@ -19,7 +19,7 @@
         @csrf
         <div class="mb-3">
             <label for="barang_id" class="form-label">Nama Barang</label>
-            <select name="barang_id" id="barang_id" class="form-control" required>
+            <select name="barang_id" id="barang_id" class="form-control select2" required>
                 <option value="">Pilih Barang</option>
                 @foreach($barangs as $barang)
                     <option value="{{ $barang->id }}" data-stok="{{ $barang->stok }}" data-harga="{{ $barang->harga_beli }}">
@@ -28,6 +28,7 @@
                 @endforeach
             </select>
         </div>
+              
         <div class="mb-3">
             <label for="tanggal_masuk" class="form-label">Tanggal Masuk</label>
             <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control" required>
@@ -54,4 +55,13 @@
         <button type="submit" class="btn btn-primary">Simpan</button>
     </form>
 </div>
+@push('scripts')
+<script>
+    console.log('test')
+    $(document).ready(function() {
+        $('#barang_id').select2();
+    });
+</script>
+@endpush
+
 @endsection

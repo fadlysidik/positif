@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="container">
-    <h2>Daftar Pelanggan</h2>
-    <a href="{{ route('pelanggan.create') }}" class="btn btn-primary">Tambah Pelanggan</a>
+    <h2>Daftar Member</h2>
+    <a href="{{ route('pelanggan.create') }}" class="btn btn-primary">Tambah Member</a>
     <table class="table mt-3">
         <thead>
             <tr>

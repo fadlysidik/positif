@@ -39,6 +39,7 @@ class PelangganController extends Controller
             'alamat' => $request->alamat,
             'no_telp' => $request->no_telp,
             'email' => $request->email,
+            'user_id' => auth()->id(),
         ]);
 
         return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan.');

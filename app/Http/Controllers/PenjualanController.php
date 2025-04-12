@@ -119,10 +119,6 @@ class PenjualanController extends Controller
             'redirect' => route('penjualan.index') // Ganti dengan route tujuan
         ]);
     }
-
-
-
-
     public function show($id)
     {
         // dd($id);

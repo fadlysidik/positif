@@ -33,7 +33,7 @@ class PengajuanBarangExport implements FromCollection, WithHeadings, WithMapping
             $pengajuan->kode_pengajuan,
             $pengajuan->tgl_pengajuan,
             $pengajuan->pelanggan->nama,
-            $pengajuan->barang->nama_barang,
+            $pengajuan->nama_barang,
             $pengajuan->jumlah,
             $pengajuan->deskripsi,
             $pengajuan->status ? 'Terpenuhi' : 'Belum Terpenuhi'

@@ -49,6 +49,10 @@ class PengajuanBarang extends Model
         return $this->belongsTo(Pelanggan::class, 'pelanggan_id');
     }
 
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class);
+    }
 
     public function user()
     {
@@ -62,7 +66,11 @@ class PengajuanBarang extends Model
 
     public function getStatusLabelAttribute()
     {
-        return $this->status ? 'Terpenuhi' : 'Belum Terpenuhi';
+        return match ($this->status) {
+            1 => 'Disetujui',
+            2 => 'Ditolak Otomatis',
+            default => 'Menunggu',
+        };
     }
 
     public function getFormattedTglPengajuanAttribute()

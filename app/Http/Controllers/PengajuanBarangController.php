@@ -10,20 +10,43 @@ use Illuminate\Support\Facades\Auth;
 use App\Exports\PengajuanBarangExport;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class PengajuanBarangController extends Controller
 {
     /**
      * Menampilkan daftar pengajuan barang.
      */
+
     public function index()
     {
-        $pengajuan = PengajuanBarang::with(['pelanggan'])->latest()->get();
-        $pelanggan = Pelanggan::all();
+        // Ambil semua pengajuan yang masih pending (status = 0)
+        $pengajuanPending = PengajuanBarang::where('status', 0)->get();
 
+        foreach ($pengajuanPending as $pengajuan) {
+            $tglPengajuan = Carbon::parse($pengajuan->tgl_pengajuan);
+            $batasWaktu = $tglPengajuan->addDays(5);
+
+            if (Carbon::now()->greaterThan($batasWaktu)) {
+                $pengajuan->update([
+                    'status' => 2 // misalnya 2 untuk "ditolak otomatis"
+                ]);
+            }
+        }
+
+        $pengajuan = PengajuanBarang::with(['pelanggan.user'])->latest()->get();
+
+        $pelanggan = Pelanggan::all();
 
         return view('pengajuan_barang.index', compact('pengajuan', 'pelanggan'));
     }
+
+    public function create()
+    {
+        $pelanggan = Pelanggan::all();
+        return view('pengajuan_barang.create', compact('pelanggan'));
+    }
+
 
     /**
      * Menyimpan data pengajuan barang baru.
@@ -39,7 +62,7 @@ class PengajuanBarangController extends Controller
 
         PengajuanBarang::create([
             'tgl_pengajuan' => now(),
-            'pelanggan_id' => $request->pelanggan_id,
+            'pelanggan_id' => $request->pelanggan_id, // bisa null
             'nama_barang' => $request->nama_barang,
             'jumlah' => $request->jumlah,
             'deskripsi' => $request->deskripsi,
@@ -47,7 +70,7 @@ class PengajuanBarangController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Pengajuan barang berhasil ditambahkan!');
+        return redirect()->route('pengajuan_barang.index')->with('success', 'Pengajuan barang berhasil ditambahkan!');
     }
 
     /**
@@ -98,26 +121,12 @@ class PengajuanBarangController extends Controller
     /**
      * Mengubah status pengajuan barang.
      */
-    public function toggleStatus(Request $request, $id)
+    public function updateStatus($id)
     {
         $pengajuan = PengajuanBarang::findOrFail($id);
-        $pengajuan->status = $request->status;
+        $pengajuan->update(['status' => true]);
 
-        if ($pengajuan->status) {
-            $pengajuan->approved_by = Auth::id();
-            $pengajuan->tgl_disetujui = now();
-        } else {
-            $pengajuan->approved_by = null;
-            $pengajuan->tgl_disetujui = null;
-        }
-
-        $pengajuan->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status pengajuan barang diperbarui!',
-            'status' => $pengajuan->status
-        ]);
+        return redirect()->route('pengajuan_barang.index')->with('success', 'Pengajuan disetujui.');
     }
 
     /**
@@ -139,7 +148,7 @@ class PengajuanBarangController extends Controller
      */
     public function exportExcel()
     {
-        return Excel::download(new PengajuanBarangExport, 'pengajuan_barang.xlsx');
+        return Excel::download(new PengajuanBarangExport, 'pengajuan_barang.admin.xlsx');
     }
 
     /**
@@ -149,6 +158,6 @@ class PengajuanBarangController extends Controller
     {
         $pengajuan = PengajuanBarang::with(['pelanggan', 'barang'])->get();
         $pdf = PDF::loadView('pengajuan_barang.pdf', compact('pengajuan'))->setPaper('a4', 'landscape');
-        return $pdf->download('pengajuan_barang.pdf');
+        return $pdf->download('pengajuan_barang.admin.pdf');
     }
 }

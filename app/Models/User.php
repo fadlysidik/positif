@@ -47,4 +47,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pembelian::class, 'user_id');
     }
+    public function pengajuanBarang()
+    {
+        return $this->hasMany(\App\Models\PengajuanBarang::class, 'user_id');
+    }
+    public function pelanggan()
+    {
+        return $this->hasOne(Pelanggan::class);
+    }
 }

@@ -31,7 +31,7 @@
                 <td>{{ $item->kode_pengajuan }}</td>
                 <td>{{ $item->tgl_pengajuan }}</td>
                 <td>{{ $item->pelanggan->nama }}</td>
-                <td>{{ $item->barang->nama_barang }}</td>
+                <td>{{ $item->nama_barang }}</td>
                 <td>{{ $item->jumlah }}</td>
                 <td>{{ $item->deskripsi }}</td>
                 <td>{{ $item->status ? 'Terpenuhi' : 'Belum Terpenuhi' }}</td>
