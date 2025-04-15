@@ -42,6 +42,10 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="form-group mt-3">
+                <label for="bayar">Bayar (Rp)</label>
+                <input type="number" class="form-control" id="bayar" placeholder="Masukkan jumlah bayar">
+            </div>            
             <h5>Total: Rp <span id="total">0</span></h5>
             <button class="btn btn-success btn-lg btn-block" onclick="prosesPembayaran()">Bayar</button>
         </div>

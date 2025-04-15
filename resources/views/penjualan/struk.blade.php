@@ -3,53 +3,74 @@
 @section('content')
 <style>
     @media print {
+        @page {
+            size: 58mm auto; /* 58mm lebar, panjang otomatis */
+            margin: 0;
+        }
+
         body {
+            margin: 0;
+            padding: 0;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .struk-container {
-            width: 80mm;
-            margin: auto;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            float: right;
+            transform: scale;
+            transform-origin: top left;    
+            width: 29mm;
+            padding: 5px;
         }
 
         .no-print {
-            display: none;
+            display: none !important;
         }
+    }
 
-        .line {
-            border-top: 1px solid #000;
-            margin: 5px 0;
-        }
+    body {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 10px;
+    }
 
-        .bold {
-            font-weight: bold;
-        }
+    .struk-container {
+        width: 58mm;
+        margin: auto;
+        padding: 5px;
+    }
 
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-        }
+    .text-center {
+        text-align: center;
+    }
 
-        .total-label {
-            font-weight: bold;
-            margin-top: 5px;
-        }
+    .line {
+        border-top: 1px dashed #000;
+        margin: 5px 0;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+    }
+
+    .total-label {
+        font-weight: bold;
+        margin-top: 8px;
+        border-top: 1px solid #000;
+        padding-top: 4px;
     }
 </style>
 
 <div class="struk-container">
+    <div class="text-center bold">
+        {{ config('app.name', 'POSITIF') }}
+    </div>
     <div class="text-center">
-        <div class="bold">{{ config('app.name', 'POS Toko') }}</div>
-        <div>{{ date('D, d/m/Y H:i', strtotime($penjualan->tgl_faktur)) }}</div>
+        {{ date('D, d/m/Y H:i', strtotime($penjualan->tgl_faktur)) }}
     </div>
 
     <div class="line"></div>
@@ -63,26 +84,14 @@
 
     <div class="line"></div>
 
-    @php
-        // Misalnya kamu ingin menambahkan pajak, bisa hitung di sini
-        $pajak = 0; // Atau sesuai kebutuhan, misal: $penjualan->total_bayar * 0.1;
-    @endphp
-
-    @if ($pajak > 0)
-        <div class="item-row">
-            <div>Tax</div>
-            <div>Rp{{ number_format($pajak, 0, ',', '.') }}</div>
-        </div>
-    @endif
-
     <div class="item-row total-label">
-        <div>TOTAL:</div>
+        <div>TOTAL</div>
         <div>Rp{{ number_format($penjualan->total_bayar, 0, ',', '.') }}</div>
     </div>
 
     <div class="line"></div>
 
-    <div class="text-center" style="font-size: 10px;">
+    <div class="text-center" style="font-size: 9px;">
         #{{ $penjualan->no_faktur }}#<br>
         Terima kasih atas kunjungan Anda
     </div>

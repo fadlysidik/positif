@@ -33,11 +33,11 @@ class LaporanController extends Controller
             ->orderBy('periode')
             ->get();
 
-        // Gabungkan data berdasarkan periode
-        $laporan = collect();
+        // Create an array first
+        $laporanArray = [];
 
         foreach ($penjualan as $pj) {
-            $laporan[$pj->periode] = [
+            $laporanArray[$pj->periode] = [
                 'periode' => $pj->periode,
                 'pendapatan' => $pj->total,
                 'pengeluaran' => 0,
@@ -45,10 +45,10 @@ class LaporanController extends Controller
         }
 
         foreach ($pembelian as $pb) {
-            if (isset($laporan[$pb->periode])) {
-                $laporan[$pb->periode]['pengeluaran'] = $pb->total;
+            if (isset($laporanArray[$pb->periode])) {
+                $laporanArray[$pb->periode]['pengeluaran'] = $pb->total;
             } else {
-                $laporan[$pb->periode] = [
+                $laporanArray[$pb->periode] = [
                     'periode' => $pb->periode,
                     'pendapatan' => 0,
                     'pengeluaran' => $pb->total,
@@ -56,7 +56,8 @@ class LaporanController extends Controller
             }
         }
 
-        $laporan = $laporan->sortKeys();
+        // Convert to collection and sort
+        $laporan = collect($laporanArray)->sortKeys();
 
         return view('laporan.owner', compact('laporan', 'filter'));
     }
@@ -93,10 +94,11 @@ class LaporanController extends Controller
             ->groupBy('periode')
             ->get();
 
-        $laporan = collect();
+        // Create an array first, then convert to collection
+        $laporanArray = [];
 
         foreach ($penjualan as $pj) {
-            $laporan[$pj->periode] = [
+            $laporanArray[$pj->periode] = [
                 'periode' => $pj->periode,
                 'pendapatan' => $pj->total,
                 'pengeluaran' => 0,
@@ -104,10 +106,10 @@ class LaporanController extends Controller
         }
 
         foreach ($pembelian as $pb) {
-            if (isset($laporan[$pb->periode])) {
-                $laporan[$pb->periode]['pengeluaran'] = $pb->total;
+            if (isset($laporanArray[$pb->periode])) {
+                $laporanArray[$pb->periode]['pengeluaran'] = $pb->total;
             } else {
-                $laporan[$pb->periode] = [
+                $laporanArray[$pb->periode] = [
                     'periode' => $pb->periode,
                     'pendapatan' => 0,
                     'pengeluaran' => $pb->total,
@@ -115,6 +117,7 @@ class LaporanController extends Controller
             }
         }
 
-        return $laporan->sortKeys();
+        // Convert to collection and sort
+        return collect($laporanArray)->sortKeys();
     }
 }

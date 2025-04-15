@@ -22,7 +22,13 @@
         @if(isset($barang))
         @method('PUT')
         @endif
-
+        
+        <div class="mb-3">
+            <label for="kode_barang" class="form-label">Kode Barang</label>
+            <input type="text" class="form-control" id="kode_barang" name="kode_barang"
+                value="{{ old('kode_barang', $barang->kode_barang ?? '') }}" required>
+        </div>
+        
         <div class="mb-3">
             <label for="produk_id" class="form-label">Produk</label>
             <select class="form-control" id="produk_id" name="produk_id" required>
@@ -35,6 +41,7 @@
                 @endforeach
             </select>
         </div>
+
 
         <div class="mb-3">
             <label for="nama_barang" class="form-label">Nama Barang</label>

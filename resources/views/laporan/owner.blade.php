@@ -6,7 +6,7 @@
 
     <div class="d-flex justify-content-end mb-3 gap-2">
         <a href="{{ route('laporan.export.pdf', ['filter' => $filter]) }}" class="btn btn-danger">
-            Export PDF
+            Import PDF
         </a>
         <a href="{{ route('laporan.export.excel', ['filter' => $filter]) }}" class="btn btn-success">
             Export Excel

@@ -5,7 +5,15 @@
     <div class="row">
         <!-- Bagian Menu -->
         <div class="col-md-8">
-            <h4 class="mb-3">Menu</h4>
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="mb-3">Menu</h4>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" id="barcode-scanner" class="form-control" placeholder="Scan barcode..." autofocus>
+                    <button class="btn btn-outline-secondary" type="button" id="clear-scan">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
             <div class="row">
                 @foreach($barang as $item)
                 <div class="col-md-3 mb-3">
@@ -17,10 +25,8 @@
                             <p class="mb-1 text-primary fw-bold flex-grow-1">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</p>
                             <button class="btn btn-primary btn-sm mt-auto w-100"
                                 onclick="tambahKeKeranjang('{{ $item->id }}', '{{ $item->nama_barang }}', '{{ $item->harga_jual }}', '{{ $item->stok }}')">
-                                <i class="bi bi-cart-plus">Tambah</i>
+                                <i class="bi bi-cart-plus"></i> Tambah
                             </button>
-
-
                         </div>
                     </div>
                 </div>
@@ -38,6 +44,7 @@
                             <th>Item</th>
                             <th>Qty</th>
                             <th>Subtotal</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody id="keranjang-body">
@@ -46,33 +53,41 @@
                         </tr>
                     </tbody>
                 </table>
-                <h5>Total: Rp <span id="total"></span></h5>
+                <h5>Total: Rp <span id="total">0</span></h5>
 
                 <hr>
 
                 <!-- Form Input Pembayaran -->
-                <select id="pelanggan_id" class="form-control">
-                    <option value="">-- Pilih Pelanggan --</option>
-                    @foreach ($pelanggan as $p)
-                    <option value="{{ $p->id }}">{{ $p->nama }}</option>
-                    @endforeach
-                </select>
+                <div class="mb-3">
+                    <label for="pelanggan_id" class="form-label">Pelanggan</label>
+                    <select id="pelanggan_id" class="form-control">
+                        <option value="">-- Pilih Pelanggan --</option>
+                        @foreach ($pelanggan as $p)
+                        <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-
-                <div class="mb-2">
+                <div class="mb-3">
                     <label class="form-label">Kasir</label>
                     <input type="text" class="form-control" value="{{ auth()->user()->name }}" readonly>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-3">
                     <label for="jumlah_tunai" class="form-label">Jumlah Tunai</label>
-                    <input type="number" class="form-control" id="jumlah_tunai" oninput="hitungKembalian()">
+                    <input type="number" class="form-control" id="jumlah_tunai"  placeholder="Masukkan jumlah uang bayar" oninput="hitungKembalian()">
                 </div>
 
-                <h5>Kembalian: Rp <span id="kembalian"></span></h5>
+                <h5>Kembalian: Rp <span id="kembalian">0</span></h5>
 
-                <button class="btn btn-danger btn-block" onclick="clearKeranjang()">Clear</button>
-                <button class="btn btn-primary btn-block" onclick="prosesPembayaran()">Bayar</button>
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-danger" onclick="clearKeranjang()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                    <button class="btn btn-success" onclick="prosesPembayaran()">
+                        <i class="bi bi-credit-card"></i> Bayar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -84,11 +99,19 @@
         height: 120px;
         object-fit: cover;
     }
+    #barcode-scanner {
+        font-size: 16px;
+        letter-spacing: 2px;
+    }
+    .table-sm td, .table-sm th {
+        padding: 0.3rem;
+    }
 </style>
 
 <script>
     let keranjang = [];
 
+    // Fungsi untuk menambahkan item ke keranjang
     function tambahKeKeranjang(id, nama, harga, stok) {
         let index = keranjang.findIndex(item => item.id === id);
 
@@ -115,15 +138,17 @@
             keranjang.push({
                 id,
                 nama,
-                harga,
+                harga: parseFloat(harga),
                 qty: 1,
-                subtotal: harga,
-                stok
+                subtotal: parseFloat(harga),
+                stok: parseInt(stok)
             });
         }
         renderKeranjang();
+        updateTotal();
     }
 
+    // Fungsi untuk mengurangi item dari keranjang
     function kurangiDariKeranjang(id) {
         let index = keranjang.findIndex(item => item.id === id);
         if (index !== -1) {
@@ -134,51 +159,62 @@
             }
         }
         renderKeranjang();
+        updateTotal();
     }
 
+    // Fungsi untuk merender keranjang
     function renderKeranjang() {
-    let tbody = document.getElementById("keranjang-body");
-    let totalElement = document.getElementById("total");
-    tbody.innerHTML = "";
-    let total = 0; // Perbaikan dari string ke angka
+        let tbody = document.getElementById("keranjang-body");
+        tbody.innerHTML = "";
 
-    if (keranjang.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
-    } else {
-        keranjang.forEach(item => {
-            let subtotal = item.qty * item.harga; 
-            total += subtotal;  // Sekarang total bertambah dengan benar
-
-            tbody.innerHTML += `
-            <tr>
-                <td>${item.nama}</td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang('${item.id}')">-</button>
-                    ${item.qty}
-                    <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang('${item.id}', '${item.nama}', ${item.harga}, ${item.stok})">+</button>
-                </td>
-                <td>Rp ${subtotal.toLocaleString()}</td>
-            </tr>`;
-        });
+        if (keranjang.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Keranjang kosong</td></tr>`;
+        } else {
+            keranjang.forEach(item => {
+                tbody.innerHTML += `
+                <tr>
+                    <td>${item.nama}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="kurangiDariKeranjang('${item.id}')">-</button>
+                        ${item.qty}
+                        <button class="btn btn-sm btn-success" onclick="tambahKeKeranjang('${item.id}', '${item.nama}', ${item.harga}, ${item.stok})">+</button>
+                    </td>
+                    <td>Rp ${item.subtotal.toLocaleString('id-ID')}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="hapusItem('${item.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            });
+        }
     }
 
-    totalElement.innerText = `${total.toLocaleString()}`; // Format angka rupiah
-    hitungKembalian();
-}
+    // Fungsi untuk menghapus item dari keranjang
+    function hapusItem(id) {
+        keranjang = keranjang.filter(item => item.id !== id);
+        renderKeranjang();
+        updateTotal();
+    }
 
+    // Fungsi untuk menghitung total
+    function updateTotal() {
+        let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
+        document.getElementById("total").innerText = total.toLocaleString('id-ID');
+        hitungKembalian();
+    }
 
+    // Fungsi untuk menghitung kembalian
+    function hitungKembalian() {
+        let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
+        let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
+        let kembalian = jumlahTunai - total;
 
-function hitungKembalian() {
-    let total = keranjang.reduce((sum, item) => sum + (item.qty * item.harga), 0);
-    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
+        document.getElementById("kembalian").innerText = 
+            kembalian >= 0 ? kembalian.toLocaleString('id-ID') : "0";
+    }
 
-    let kembalian = jumlahTunai - total;
-
-    // Jika hasilnya NaN atau tidak valid, tampilkan 0
-    document.getElementById("kembalian").innerText = kembalian >= 0 ? kembalian.toLocaleString() : "0";
-}
-
-
+    // Fungsi untuk mengosongkan keranjang
     function clearKeranjang() {
         Swal.fire({
             title: "Konfirmasi",
@@ -193,6 +229,7 @@ function hitungKembalian() {
                 renderKeranjang();
                 document.getElementById("jumlah_tunai").value = "";
                 document.getElementById("kembalian").innerText = "0";
+                updateTotal();
                 Swal.fire({
                     icon: "success",
                     title: "Keranjang Dikosongkan",
@@ -202,45 +239,44 @@ function hitungKembalian() {
         });
     }
 
-
+    // Fungsi untuk proses pembayaran
     function prosesPembayaran() {
-    if (keranjang.length === 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Keranjang Kosong",
-            text: "Tambahkan barang terlebih dahulu!",
-        });
-        return;
-    }
+        if (keranjang.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Keranjang Kosong",
+                text: "Tambahkan barang terlebih dahulu!",
+            });
+            return;
+        }
 
-    let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
-    let total = keranjang.reduce((sum, item) => sum * item.subtotal, 0);
+        let jumlahTunai = parseFloat(document.getElementById("jumlah_tunai").value) || 0;
+        let total = keranjang.reduce((sum, item) => sum + item.subtotal, 0);
 
-    console.log("Total: ", total);
-    console.log("Jumlah Tunai: ", jumlahTunai);
+        if (jumlahTunai < total) {
+            Swal.fire({
+                icon: "error",
+                title: "Pembayaran Gagal",
+                text: "Jumlah tunai kurang dari total pembayaran!",
+            });
+            return;
+        }
 
-    if (jumlahTunai < total) {
-        Swal.fire({
-            icon: "error",
-            title: "Pembayaran Gagal",
-            text: "Jumlah tunai kurang dari total pembayaran!",
-        });
-        return;
-    }
+        let dataTransaksi = {
+            pelanggan_id: document.getElementById("pelanggan_id").value || null,
+            barang_id: keranjang.map(item => item.id),
+            jumlah: keranjang.map(item => item.qty),
+            harga_jual: keranjang.map(item => item.harga),
+            jumlah_tunai: jumlahTunai,
+            kembalian: jumlahTunai - total,
+        };
 
-    let dataTransaksi = {
-        pelanggan_id: document.getElementById("pelanggan_id")?.value || null,
-        barang_id: keranjang.map(item => item.id),
-        jumlah: keranjang.map(item => item.qty),
-        harga_jual: keranjang.map(item => item.harga),
-        jumlah_tunai: jumlahTunai,
-        kembalian: jumlahTunai - total,
-    };
+        console.log(dataTransaksi)
 
-    fetch(document.querySelector('meta[name="route-penjualan"]').getAttribute('content'), {
+        fetch("{{ route('penjualan.store') }}", {
             method: "POST",
             headers: {
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
@@ -260,7 +296,7 @@ function hitungKembalian() {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                window.location.href = data.redirect; // Redirect ke halaman tujuan
+                window.location.href = data.redirect || "{{ route('penjualan.index') }}";
             });
         })
         .catch(error => {
@@ -271,6 +307,83 @@ function hitungKembalian() {
                 text: error.message,
             });
         });
-}
+    }
+
+    // Fungsi untuk handle scan barcode
+    document.addEventListener('DOMContentLoaded', function() {
+        const barcodeInput = document.getElementById('barcode-scanner');
+        const clearScanBtn = document.getElementById('clear-scan');
+        let scanTimeout;
+
+        // Fokus otomatis ke input barcode
+        barcodeInput.focus();
+
+        barcodeInput.addEventListener('input', function(e) {
+            clearTimeout(scanTimeout);
+            
+            // Tunggu 500ms setelah input terakhir untuk memastikan scan selesai
+            scanTimeout = setTimeout(() => {
+                if (barcodeInput.value.length > 0) {
+                    handleBarcodeScan(barcodeInput.value);
+                    barcodeInput.value = '';
+                }
+            }, 500);
+        });
+
+        clearScanBtn.addEventListener('click', function() {
+            barcodeInput.value = '';
+            barcodeInput.focus();
+        });
+
+        function handleBarcodeScan(barcode) {
+            // Gunakan route biasa untuk mencari barang
+            fetch("{{ route('penjualan.cariBarang') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({ barcode: barcode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Barang tidak ditemukan');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.barang) {
+                    const barang = data.barang;
+                    tambahKeKeranjang(
+                        barang.id, 
+                        barang.nama_barang, 
+                        barang.harga_jual, 
+                        barang.stok
+                    );
+                    
+                    // Feedback suara
+                    playBeepSound();
+                } else {
+                    showBarcodeError('Kode barcode tidak valid');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showBarcodeError(error.message);
+            });
+        }
+
+        // function showBarcodeError(message) {
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'Scan Gagal',
+        //         text: message,
+        //         timer: 1500,
+        //         showConfirmButton: false
+        //     });
+        //     playErrorSound();
+        // }
+    });
 </script>
 @endsection

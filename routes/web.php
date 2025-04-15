@@ -52,6 +52,10 @@ Route::middleware('auth')->group(function () {
     // BARANG
     // ===========================
     Route::resource('barang', BarangController::class);
+    Route::get('/laporan/barang', [BarangController::class, 'laporan'])->name('barang.laporan');
+    Route::get('/laporan/barang/pdf', [BarangController::class, 'exportPDF'])->name('barang.exportPDF');
+    Route::get('/laporan/barang/excel', [BarangController::class, 'exportExcel'])->name('barang.exportExcel');
+
 
     // ===========================
     // PEMBELIAN
@@ -81,6 +85,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/pembayaran', [PenjualanController::class, 'pembayaran'])->name('penjualan.pembayaran');
         Route::post('/{id}/proses-pembayaran', [PenjualanController::class, 'prosesPembayaran'])->name('penjualan.proses_pembayaran');
         Route::get('/penjualan/{id}/struk', [PenjualanController::class, 'cetakStruk'])->name('penjualan.struk');
+        Route::post('/penjualan/cari-barang', [PenjualanController::class, 'cariBarang'])->name('penjualan.cariBarang');
+
 
 
         // Detail penjualan via AJAX

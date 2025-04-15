@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BarangExport;
 use Illuminate\Http\Request;
 use App\Models\Barang;
 use App\Models\Produk;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BarangController extends Controller
 {
@@ -33,15 +36,10 @@ class BarangController extends Controller
             'expired' => 'nullable|date',
         ]);
 
-        $date = date('Ymd');
-        $lastBarang = Barang::whereDate('created_at', now()->toDateString())->latest()->first();
-        $number = $lastBarang ? intval(substr($lastBarang->kode_barang, -4)) + 1 : 1;
-        $kodeBarang = 'BRG-' . $date . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-
         $gambarPath = $request->hasFile('gambar') ? $request->file('gambar')->store('barang_images', 'public') : null;
 
         Barang::create([
-            'kode_barang' => $kodeBarang,
+            'kode_barang' => $request->kode_barang,
             'produk_id' => $request->produk_id,
             'nama_barang' => $request->nama_barang,
             'satuan' => $request->satuan,
@@ -85,6 +83,7 @@ class BarangController extends Controller
         }
 
         $barang->update([
+            'kode_barang' => $request->kode_barang,
             'produk_id' => $request->produk_id,
             'nama_barang' => $request->nama_barang,
             'satuan' => $request->satuan,
@@ -110,5 +109,22 @@ class BarangController extends Controller
         $barang->delete();
 
         return redirect()->route('barang.index')->with('success', 'Barang berhasil dihapus.');
+    }
+
+    public function laporan()
+    {
+        $barang = Barang::with('produk')->get();
+        return view('barang.laporan', compact('barang'));
+    }
+    public function exportPDF()
+    {
+        $barang = Barang::with('produk')->get();
+        $pdf = Pdf::loadView('barang.laporan_pdf', compact('barang'));
+        return $pdf->download('laporan-barang.pdf');
+    }
+
+    public function exportExcel()
+    {
+        return Excel::download(new BarangExport, 'laporan-barang.xlsx');
     }
 }
