@@ -52,12 +52,7 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('laporan.owner') }}">
-                    <i class="fas fa-list"></i>
-                    <span>Lapooran</span>
-                </a>
-            </li>
+            
             
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">

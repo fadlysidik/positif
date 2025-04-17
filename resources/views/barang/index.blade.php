@@ -3,7 +3,18 @@
 @section('content')
     <div class="container mt-4">
         <h2>Daftar Barang</h2>
-        <a href="{{ route('barang.create') }}" class="btn btn-primary mb-3">Tambah Barang</a>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <a href="{{ route('barang.create') }}" class="btn btn-primary">Tambah Barang</a>
+            </div>
+            <div class="col-md-6">
+                <!-- Form Pencarian di sisi kanan -->
+                <form method="GET" action="{{ route('barang.index') }}" class="d-flex justify-content-end">
+                    <input type="text" name="search" class="form-control w-50" placeholder="Cari berdasarkan kode atau nama barang" value="{{ request()->search }}">
+                    <button type="submit" class="btn btn-primary ml-2">Cari</button>
+                </form>
+            </div>
+        </div>
         
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>

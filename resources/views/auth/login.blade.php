@@ -11,7 +11,7 @@
     <!-- Navbar -->
     <nav class="bg-white text-gray-800 px-6 py-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold">POSitif</a>
+            <a href="/" class="text-2xl font-bold">POSITIF</a>
             <ul class="flex space-x-6 text-lg">
                 <li><a href="{{route('login')}}" class="text-gray-800">Masuk</a></li>
                 <li><a href="{{route('register')}}" class="bg-teal-600 text-white px-6 py-2 rounded-full">Daftar</a></li>
@@ -21,7 +21,7 @@
 
     <!-- Login Section -->
     <section class="max-w-lg mx-auto mt-16 p-8 bg-white shadow-lg rounded-lg">
-        <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">Masuk ke POSitif</h2>
+        <h2 class="text-2xl font-semibold mb-6 text-center text-gray-800">Masuk ke POSITIF</h2>
 
         <!-- Display Error Messages -->
         @if ($errors->any())
@@ -58,7 +58,7 @@
 
     <!-- Footer -->
     <footer class="bg-white text-gray-800 py-6 text-center mt-16 border-t">
-        <p>&copy;2025 POSitif.  All rights reserved.</p>
+        <p>&copy;2025 POSITIF.  All rights reserved.</p>
     </footer>
 
 </body>

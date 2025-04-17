@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\AbsensiController;
 use Illuminate\Support\Facades\Route;
 use App\Models\DetailPenjualan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PemasokController;
 use App\Http\Controllers\PembelianController;
@@ -116,7 +118,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
 
     // ===========================
-    // 📋 PENGAJUAN BARANG (ADMIN)
+    // PENGAJUAN BARANG (ADMIN)
     // ===========================
     Route::middleware('role:admin')->prefix('pengajuan_barang')->group(function () {
         Route::get('/', [PengajuanBarangController::class, 'index'])->name('pengajuan_barang.index');
@@ -149,8 +151,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/export/pdf', [LaporanController::class, 'exportPDF'])->name('laporan.export.pdf');
     Route::get('/laporan/export/excel', [LaporanController::class, 'exportExcel'])->name('laporan.export.excel');
 
+    // ===========================
+    // Absensi
+    // ===========================
+    Route::prefix('absensi')->name('absensi.')->group(function () {
+        Route::get('/', [AbsensiController::class, 'index'])->name('index');
+        Route::post('/', [AbsensiController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AbsensiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AbsensiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AbsensiController::class, 'destroy'])->name('destroy');
+        Route::get('/export-excel', [AbsensiController::class, 'exportExcel'])->name('exportExcel');
+        Route::get('/export-pdf', [AbsensiController::class, 'exportPdf'])->name('exportPdf');
+        Route::post('/import-pdf', [AbsensiController::class, 'importPdf'])->name('importPdf');
+        Route::patch('/{id}/selesai', [AbsensiController::class, 'updateWaktuSelesai'])->name('updateWaktuSelesai');
+    });
 
-
+    // ===========================
+    // Pegawai
+    // ===========================
+    Route::resource('pegawai', PegawaiController::class);
 
     // ===========================
     // LOGOUT

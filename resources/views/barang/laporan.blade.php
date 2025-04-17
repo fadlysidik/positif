@@ -8,11 +8,14 @@
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Data Barang</h6>
             <div>
-                <a href="{{ route('barang.exportPDF') }}" class="btn btn-danger btn-sm mr-2">
-                    <i class="fas fa-file-pdf"></i> Export PDF
-                </a>
                 <a href="{{ route('barang.exportExcel') }}" class="btn btn-success btn-sm mr-2">
                     <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+                <a href="{{ route('barang.exportPDF') }}" class="btn btn-danger btn-sm mr-2">
+                    <i class="fas fa-file-pdf"></i> Import PDF
+                </a>
+                <a href="{{ route('barang.exportExcel') }}" class="btn btn-danger btn-sm mr-2">
+                    <i class="fas fa-file-pdf"></i> Export
                 </a>
             </div>
         </div>

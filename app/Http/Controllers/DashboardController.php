@@ -9,17 +9,32 @@ use App\Models\Penjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class DashboardController
+ * Mengelola tampilan dashboard berdasarkan peran pengguna
+ */
 class DashboardController extends Controller
 {
-    // Untuk Admin
+    /**
+     * Tampilkan dashboard untuk Admin.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
+        /// Total jumlah barang
         $totalBarang = Barang::count();
+
+        /// Total nilai pembelian dari seluruh data
         $totalPembelian = Pembelian::sum('total');
+
+        /// Total nilai penjualan dari seluruh data
         $totalPenjualan = Penjualan::sum('total_bayar');
+
+        /// Total jumlah pelanggan
         $totalPelanggan = Pelanggan::count();
 
-        // Ambil data penjualan per bulan
+        /// Ambil data total penjualan per bulan
         $penjualanData = Penjualan::select(
             DB::raw('MONTH(tgl_faktur) as bulan'),
             DB::raw('SUM(total_bayar) as total')
@@ -28,7 +43,7 @@ class DashboardController extends Controller
             ->orderBy('bulan', 'asc')
             ->get();
 
-        // Ambil data pembelian per bulan
+        /// Ambil data total pembelian per bulan
         $pembelianData = Pembelian::select(
             DB::raw('MONTH(tanggal_masuk) as bulan'),
             DB::raw('SUM(total) as total')
@@ -37,22 +52,25 @@ class DashboardController extends Controller
             ->orderBy('bulan', 'asc')
             ->get();
 
-        // Konversi angka bulan ke nama bulan
+        /// Ubah angka bulan menjadi nama bulan
         $bulanPenjualan = $penjualanData->pluck('bulan')->map(function ($bulan) {
             return date("F", mktime(0, 0, 0, $bulan, 1));
         });
 
+        /// Ambil jumlah penjualan
         $jumlahPenjualan = $penjualanData->pluck('total');
+
+        /// Ambil jumlah pembelian
         $jumlahPembelian = $pembelianData->pluck('total');
 
-        // Hitung keuntungan: Penjualan - Pembelian
+        /// Hitung keuntungan = Penjualan - Pembelian
         $jumlahKeuntungan = [];
         foreach ($jumlahPenjualan as $key => $penjualan) {
-            $pembelian = $jumlahPembelian[$key] ?? 0; // Jika tidak ada pembelian, gunakan 0
+            $pembelian = $jumlahPembelian[$key] ?? 0;
             $jumlahKeuntungan[] = $penjualan - $pembelian;
         }
 
-        // Pendapatan di sini bisa dianggap sebagai total penjualan
+        /// Total pendapatan (bisa diartikan sebagai total penjualan)
         $jumlahPendapatan = $jumlahPenjualan;
 
         return view('dashboard.admin', compact(
@@ -67,26 +85,44 @@ class DashboardController extends Controller
         ));
     }
 
-    // Untuk Kasir
+    /**
+     * Tampilkan dashboard untuk Kasir.
+     *
+     * @return \Illuminate\View\View
+     */
     public function kasirDashboard()
     {
         return view('dashboard.kasir');
     }
 
-    // Untuk Owner
+    /**
+     * Tampilkan dashboard untuk Pemilik.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
     public function pemilikDashboard(Request $request)
     {
+        /// Total barang
         $totalBarang = Barang::count();
+
+        /// Total pembelian
         $totalPembelian = Pembelian::sum('total');
+
+        /// Total penjualan
         $totalPenjualan = Penjualan::sum('total_bayar');
+
+        /// Total pelanggan
         $totalPelanggan = Pelanggan::count();
+
+        /// Laba bersih = total penjualan - pembelian
         $labaBersih = $totalPenjualan - $totalPembelian;
 
+        /// Filter data: bulanan (default), harian, atau tahunan
         $filter = $request->get('filter', 'bulanan');
 
-        // Data Penjualan dan Pembelian berdasarkan filter
+        /// Ambil data berdasarkan filter
         if ($filter == 'harian') {
-            // Data harian
             $penjualanData = Penjualan::select(
                 DB::raw('DATE(tgl_faktur) as label'),
                 DB::raw('SUM(total_bayar) as total')
@@ -103,7 +139,6 @@ class DashboardController extends Controller
                 ->orderBy('label', 'asc')
                 ->get();
         } elseif ($filter == 'tahunan') {
-            // Data tahunan
             $penjualanData = Penjualan::select(
                 DB::raw('YEAR(tgl_faktur) as label'),
                 DB::raw('SUM(total_bayar) as total')
@@ -119,8 +154,7 @@ class DashboardController extends Controller
                 ->groupBy('label')
                 ->orderBy('label', 'asc')
                 ->get();
-        } else { // default bulanan
-            // Data bulanan
+        } else {
             $penjualanData = Penjualan::select(
                 DB::raw("DATE_FORMAT(tgl_faktur, '%Y-%m') as label"),
                 DB::raw('SUM(total_bayar) as total')
@@ -138,7 +172,7 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        // Siapkan array bulan dan total penjualan/pembelian yang diinisialisasi dengan 0
+        /// Daftar label bulan singkat
         $months = [
             'Jan',
             'Feb',
@@ -154,21 +188,23 @@ class DashboardController extends Controller
             'Dec'
         ];
 
+        /// Inisialisasi array bulanan
         $monthlyDataPenjualan = array_fill_keys($months, 0);
         $monthlyDataPembelian = array_fill_keys($months, 0);
 
-        // Mengisi data yang ada ke dalam array $monthlyData
+        /// Isi array penjualan
         foreach ($penjualanData as $data) {
-            $month = date('M', strtotime($data->label)); // Ambil bulan dari label
-            $monthlyDataPenjualan[$month] = $data->total; // Set total penjualan untuk bulan tersebut
+            $month = date('M', strtotime($data->label));
+            $monthlyDataPenjualan[$month] = $data->total;
         }
 
+        /// Isi array pembelian
         foreach ($pembelianData as $data) {
-            $month = date('M', strtotime($data->label)); // Ambil bulan dari label
-            $monthlyDataPembelian[$month] = $data->total; // Set total pembelian untuk bulan tersebut
+            $month = date('M', strtotime($data->label));
+            $monthlyDataPembelian[$month] = $data->total;
         }
 
-        // Ambil data label dan totals untuk dikirim ke view
+        /// Label dan nilai untuk chart
         $labels = array_keys($monthlyDataPenjualan);
         $totalsPenjualan = array_values($monthlyDataPenjualan);
         $totalsPembelian = array_values($monthlyDataPembelian);
@@ -186,14 +222,26 @@ class DashboardController extends Controller
         ));
     }
 
-    // Untuk Member
+    /**
+     * Tampilkan dashboard untuk Member.
+     *
+     * @return \Illuminate\View\View
+     */
     public function memberDashboard()
     {
+        /// Ambil user yang sedang login
         $user = auth()->user();
 
+        /// Total pengajuan barang oleh member
         $totalPengajuan = $user->pengajuanBarang()->count();
+
+        /// Pengajuan yang disetujui
         $pengajuanDisetujui = $user->pengajuanBarang()->where('status', 'disetujui')->count();
+
+        /// Pengajuan yang ditolak
         $pengajuanDitolak = $user->pengajuanBarang()->where('status', 'ditolak')->count();
+
+        /// 5 pengajuan terbaru
         $pengajuanTerbaru = $user->pengajuanBarang()->latest()->take(5)->get();
 
         return view('dashboard.member', compact(

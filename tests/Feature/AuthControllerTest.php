@@ -11,23 +11,23 @@ use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
-    // use RefreshDatabase;
+    use RefreshDatabase;
 
     // Test non-member (admin) login
     public function testAdminLoginSuccessfully()
     {
         $user = User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+            'name' => 'Admin User 2',
+            'email' => 'admin2@example.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
 
         $credentials = [
-            'email' => 'admin@example.com',
+            'email' => 'admin2@example.com',
             'password' => 'password',
         ];
-        
+
         $response = $this->post('/login', $credentials);
         $response->assertStatus(302);
         $response->assertRedirect('/dashboard/admin');
@@ -38,8 +38,8 @@ class AuthControllerTest extends TestCase
     public function testMemberLoginSuccessfully()
     {
         $user = User::create([
-            'name' => 'User Member',
-            'email' => 'member@example.com',
+            'name' => 'User Member 3',
+            'email' => 'member3@example.com',
             'password' => Hash::make('password'),
             'role' => 'member',
         ]);
@@ -54,10 +54,10 @@ class AuthControllerTest extends TestCase
         ]);
 
         $credentials = [
-            'email' => 'member@example.com',
+            'email' => 'member3@example.com',
             'password' => 'password',
         ];
-        
+
         $response = $this->post('/login', $credentials);
         $response->assertStatus(302);
         $response->assertRedirect('/dashboard/member');
@@ -79,7 +79,7 @@ class AuthControllerTest extends TestCase
             'email' => 'admin1@example.com',
             'password' => 'wrongpassword',
         ];
-        
+
         $response = $this->post('/login', $credentials);
         $response->assertStatus(302);
         $response->assertRedirect('/');

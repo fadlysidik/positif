@@ -1,4 +1,4 @@
-@extends('layout.pemilik')
+@extends('layout.kasir')
 @section('content')
 
 <div class="container mt-4">

@@ -107,6 +107,17 @@
                     <span>Laporan Barang</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('pegawai.index') }}">
+                    <i class="fas fa-user-edit"></i> Pegawai
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('absensi.index') }}">
+                    <i class="fas fa-calendar-check"></i> Absensi Kerja
+                </a>
+            </li>
+            
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 

@@ -7,7 +7,7 @@
     <div class="d-flex gap-2 mb-3">
         <a href="{{ route('pengajuan_barang.create') }}" class="btn btn-primary">+ Ajukan Barang</a>
         <a href="{{ route('pengajuan_barang.exportExcel') }}" class="btn btn-success">Export Excel</a>
-        <a href="{{ route('pengajuan_barang.exportPDF') }}" class="btn btn-danger">Export PDF</a>
+        <a href="{{ route('pengajuan_barang.exportPDF') }}" class="btn btn-danger">Import PDF</a>
     </div>
 
     {{-- Alert Sukses --}}
@@ -63,16 +63,6 @@
                                 </button>
                             </form>
                         @endif
-
-                        {{-- 
-                        <form action="{{ route('pengajuan_barang.destroy', $item->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
-                                Hapus
-                            </button>
-                        </form>
-                        --}}
                     </td>
                 </tr>
             @empty

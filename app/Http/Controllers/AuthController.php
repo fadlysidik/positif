@@ -11,92 +11,132 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @class AuthController
+ * @brief Mengelola autentikasi pengguna seperti login, register, dan logout.
+ */
 class AuthController extends Controller
 {
-    // Menampilkan form login
+    /**
+     * @brief Menampilkan form login kepada pengguna.
+     *
+     * @return \Illuminate\View\View Tampilan halaman login.
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Menangani proses login
+    /**
+     * @brief Memproses permintaan login pengguna.
+     *
+     * @param Request $request Data permintaan HTTP yang berisi email dan password.
+     * @return \Illuminate\Http\RedirectResponse Redirect ke dashboard berdasarkan peran pengguna.
+     */
     public function login(Request $request)
     {
-        // Validasi dan autentikasi
+        /**
+         * @var array $credentials Menyimpan email dan password dari form.
+         */
         $credentials = $request->only('email', 'password');
 
+        // Coba autentikasi pengguna dengan kredensial
         if (Auth::attempt($credentials)) {
-            // Mengambil role pengguna setelah login
+            /**
+             * @var User $user Pengguna yang berhasil login.
+             */
             $user = Auth::user();
 
-            // Redirect berdasarkan role pengguna
+            // Arahkan pengguna ke dashboard sesuai perannya
             switch ($user->role) {
                 case 'admin':
-                    return redirect()->route('dashboard.admin'); // Dashboard untuk admin
+                    return redirect()->route('dashboard.admin');
                 case 'kasir':
-                    return redirect()->route('dashboard.kasir'); // Dashboard untuk kasir
+                    return redirect()->route('dashboard.kasir');
                 case 'pemilik':
-                    return redirect()->route('dashboard.pemilik'); // Dashboard untuk pemilik
+                    return redirect()->route('dashboard.pemilik');
                 case 'member':
-                    return redirect()->route('dashboard.member'); // Dashboard untuk pemilik
+                    return redirect()->route('dashboard.member');
                 default:
-                    return redirect()->route('dashboard'); // Default fallback jika role tidak dikenal
+                    return redirect()->route('dashboard');
             }
         } else {
-            // Login gagal
-            return back()->withErrors(['email' => 'Email atau password salah.']);
+            // Jika gagal login, kembali ke form login dengan error
+            return back()->withErrors([
+                'email' => 'Email atau password salah.'
+            ])->withInput();
         }
     }
 
-    // Menampilkan form register
+    /**
+     * @brief Menampilkan form registrasi pengguna.
+     *
+     * @return \Illuminate\View\View Tampilan halaman register.
+     */
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
-    // Menangani proses register
+    /**
+     * @brief Menangani proses pendaftaran pengguna baru.
+     *
+     * @param Request $request Data permintaan HTTP dari form register.
+     * @return \Illuminate\Http\RedirectResponse Redirect ke dashboard sesuai peran pengguna.
+     */
     public function register(Request $request)
     {
-        // Validasi input
+        /**
+         * @var \Illuminate\Contracts\Validation\Validator $validator Objek untuk memvalidasi input.
+         */
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,kasir,pemilik', // Menambahkan role
+            'role'     => 'required|in:admin,kasir,pemilik', // Peran yang diperbolehkan
         ]);
 
+        // Jika validasi gagal, redirect kembali dengan error
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        // Menyimpan data pengguna baru
+        /**
+         * @var User $user Membuat user baru berdasarkan data input.
+         */
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role, // Menyimpan role pengguna
+            'role'     => $request->role,
         ]);
 
-        // Login otomatis setelah pendaftaran
+        // Login otomatis setelah registrasi
         Auth::login($user);
 
-        // Redirect berdasarkan role pengguna setelah pendaftaran
+        // Redirect ke dashboard sesuai role
         switch ($user->role) {
             case 'admin':
-                return redirect()->route('dashboard.admin'); // Dashboard untuk admin
+                return redirect()->route('dashboard.admin');
             case 'kasir':
-                return redirect()->route('dashboard.kasir'); // Dashboard untuk kasir
+                return redirect()->route('dashboard.kasir');
             case 'pemilik':
-                return redirect()->route('dashboard.pemilik'); // Dashboard untuk pemilik
+                return redirect()->route('dashboard.pemilik');
             default:
-                return redirect()->route('dashboard'); // Default fallback jika role tidak dikenal
+                return redirect()->route('dashboard');
         }
     }
 
-    // Logout pengguna
+    /**
+     * @brief Melakukan proses logout dan mengarahkan ke halaman login.
+     *
+     * @return \Illuminate\Http\RedirectResponse Redirect ke halaman login.
+     */
     public function logout()
     {
-        Auth::logout();  // Logout user
-        return redirect('/login');  // Arahkan pengguna ke halaman login setelah logout
+        Auth::logout(); // Menghapus sesi login pengguna
+        return redirect('/login'); // Kembali ke halaman login
     }
 }
